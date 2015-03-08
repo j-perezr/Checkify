@@ -1,49 +1,63 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-    <style>
-        .cr-input{
-            position:relative;
-            width:20px;
-            height:20px;
-            display: inline-block;
-            border: 1px solid;
-            z-index:1;
-        }
-        .cr-hover.cr-active,
-        .cr-active{
-            background:red;
-        }
-        .cr-hover{
-            background:blue;
-        }
-        .cr-focus{
-            border-color:chocolate;
-        }
-        .cr-nativeInput{
-            position:absolute;
-            top:0;
-            left:0;
-            z-index:0;
-            opacity:0;
-        }
-    </style>
-    <script type="text/javascript" src="../external/jquery-1.11.2.min.js"></script>
-    <script type="text/javascript" src="../src/CustomCR.js"></script>
-</head>
-<body>
-    <input type="checkbox"/>
-    <div class="log"></div>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title></title>
+        <style>
+            .cr-input {
+                position: relative;
+                width: 20px;
+                height: 20px;
+                display: inline-block;
+                border: 1px solid;
+                z-index: 1;
+            }
 
-    <script type="text/javascript">
-        new CustomCR({
-            masterNode:$("input")
-        });
-        $(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave",function(e){
-           $(".log").append("<p>"+ e.type + "</p>");
-        });
-    </script>
-</body>
+            .cr-hover.cr-active,
+            .cr-active {
+                background: red;
+            }
+
+            .cr-hover {
+                background: blue;
+            }
+
+            .cr-focus {
+                border-color: chocolate;
+            }
+
+            .cr-checked,
+            .cr-checked.cr-hover,
+            .cr-checked.cr-active,
+            .cr-checked.cr-hover.cr-active {
+                background-color: darkgreen;
+            }
+
+            .cr-nativeInput {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                opacity: 0;
+            }
+        </style>
+        <script type="text/javascript" src="../external/jquery-1.11.2.min.js"></script>
+        <script type="text/javascript" src="../src/CustomCR.js"></script>
+    </head>
+    <body>
+        <label for="test">Test
+            <input id="test" type="checkbox"/>
+        </label>
+
+        <div class="log"></div>
+
+        <script type="text/javascript">
+            cr = new CustomCR({
+                masterNode: $("input")
+            });
+            $(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave", function (e) {
+                $(".log").append("<p>" + e.type + "</p>");
+            });
+        </script>
+    </body>
 </html>
