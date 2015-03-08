@@ -1,2 +1,2 @@
-# CustomCR
-Javascript UI component based on Jquery to customice checkbox and radio buttons
+# CustomCR (under development)
+Under development: Javascript UI component based on Jquery to customice checkbox and radio buttons
