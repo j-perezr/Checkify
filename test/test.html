@@ -13,6 +13,9 @@
                 z-index: 1;
             }
 
+            .cr-radio {
+                border-radius: 50%;
+            }
             .cr-hover.cr-active,
             .cr-active {
                 background: red;
@@ -48,16 +51,23 @@
         <label for="test">Test
             <input id="test" type="checkbox"/>
         </label>
+        <input type="radio" name="a">
+        <input type="radio" name="a">
 
         <div class="log"></div>
 
         <script type="text/javascript">
-            cr = new CustomCR({
-                masterNode: $("input")
-            });
-            $(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave", function (e) {
+            var inputs = $("input");
+            for (var cont = 0; cont < inputs.length; cont++) {
+                var current = $(inputs[cont]);
+                inputs.push(new CustomCR({
+                    masterNode: current
+                }));
+
+            }
+            /*$(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave", function (e) {
                 $(".log").append("<p>" + e.type + "</p>");
-            });
+             });*/
         </script>
     </body>
 </html>

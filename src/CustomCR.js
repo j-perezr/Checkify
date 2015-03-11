@@ -121,6 +121,7 @@ var CustomCR = (function () {
                           " blur" + this.EVENT_NAMESPACE +
                           " keydown" + this.EVENT_NAMESPACE +
                           " keyup" + this.EVENT_NAMESPACE, {instance: this}, this._onEventTriggered);
+            masterNode.on("crrefresh" + this.EVENT_NAMESPACE, {instance: this}, this._onRefreshEvent);
             //if label exists, assign events for mouse and touch (hover, active, focus)
             if (label) {
                 label.on("touchstart" + this.EVENT_NAMESPACE +
@@ -136,6 +137,7 @@ var CustomCR = (function () {
                     label.on("click" + this.EVENT_NAMESPACE, {instance: this}, this._onEventTriggered);
                 }
             }
+            // [fixme fallo en propagación de evento en checkbox al hacer click en el falselyInput dentro de un label]
             //if the label is the parent of falselyInput, is not necesary assign events to the falselyInput because mouse and touch events always be triggered on label. This improve event management
             if (assignEventsToFalselyInput === true) {
                 falselyInput.on("click" + this.EVENT_NAMESPACE +
@@ -159,10 +161,10 @@ var CustomCR = (function () {
         refresh: function () {
             var attributes = this.attributes,
                 masterNode = attributes.masterNode,
-                disabled = masterNode.attr("disabled") == undefined ? false : true,
-                checked = masterNode.attr("checked") == undefined ? false : true;
+                disabled = masterNode.attr("disabled") === undefined ? false : true,
+                checked = masterNode.prop("checked");
             this.check(checked);
-            this.setDisabled(disabled);
+            this.disable(disabled);
         },
         toggle: function () {
             this.check(!this.attributes.checked);
@@ -170,13 +172,15 @@ var CustomCR = (function () {
         disable: function (isDisabled) {
             var attributes = this.attributes,
                 masterNode = attributes.masterNode;
-            attributes.disabled = isDisabled;
-            masterNode.prop("disabled", isDisabled);
-            this._updateState(isDisabled, (attributes.classDisabled || this.CLASS_DISABLED));
-            if (isDisabled) {
-                masterNode.attr("disabled", "disabled");
-            } else {
-                masterNode.removeAttr("disabled");
+            if (attributes.disabled !== isDisabled || masterNode.prop("disabled") !== attributes.disabled) {
+                attributes.disabled = isDisabled;
+                masterNode.prop("disabled", isDisabled);
+                this._updateState(isDisabled, (attributes.classDisabled || this.CLASS_DISABLED));
+                if (isDisabled) {
+                    masterNode.attr("disabled", "disabled");
+                } else {
+                    masterNode.removeAttr("disabled");
+                }
             }
         },
         destroy: function () {
@@ -231,6 +235,9 @@ var CustomCR = (function () {
                     //prevent infinite loops
                     attributes.ignoreChangeEvent = true;
                     masterNode.trigger("change");
+                }
+                if (attributes.type === "radio" && checked === true) {
+                    $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger("crrefresh");
                 }
             }
         },
@@ -291,10 +298,13 @@ var CustomCR = (function () {
                 case "click":
                     console.log("click", e);
                     var target = e.target,
-                        attributes = instance.attributes;
+                        attributes = instance.attributes,
+                        masterNode = attributes.masterNode;
                     if (target === attributes.falselyInput.get(0)) {
-                        instance.check(!attributes.masterNode.prop("checked"));
-                    } else if (target === attributes.masterNode.get(0)) {
+                        if (attributes.type !== "radio" || masterNode.prop("checked") === false) {
+                            instance.check(!masterNode.prop("checked"));
+                        }
+                    } else if (target === masterNode.get(0)) {
                         /*by default, the native input is inside of the custom input, if the native input has position and opacity and it's clicked,
                          *the click event is propagated up to the custom input and cause double event. In order to avoid this, when the native input trigger a click event,
                          *the propagation is canceled.
@@ -366,6 +376,9 @@ var CustomCR = (function () {
         },
         _onTouchEnd: function () {
             this.attributes.touchEnd = true;
+        },
+        _onRefreshEvent: function (e) {
+            e.data.instance.refresh();
         }
     };
     return CustomCR;
