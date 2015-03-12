@@ -13,6 +13,9 @@
                 z-index: 1;
             }
 
+            .myCheckboxClass {
+                border: 4px dotted orange;
+            }
             .cr-radio {
                 border-radius: 50%;
             }
@@ -48,11 +51,19 @@
         <script type="text/javascript" src="../src/CustomCR.js"></script>
     </head>
     <body>
+        <p>Checkbo inside label</p>
         <label for="test">Test
             <input id="test" type="checkbox"/>
         </label>
-        <input type="radio" name="a">
-        <input type="radio" name="a">
+        <p>Checkbox alone with data-customcr-class-checkbox</p>
+        <input data-customcr-class-checkbox="myCheckboxClass" type="checkbox"/>
+        <p>Radio insde label</p>
+        <label for="testradio">Testradio input as child of label
+            <input id="testradio" type="radio" name="a">
+        </label>
+        <p>Radio at same level of his label</p>
+        <label for="testradio2">Testradio input at same level of label</label>
+        <input id="testradio2" type="radio" name="a">
 
         <div class="log"></div>
 
