@@ -152,6 +152,7 @@ class CustomCR {
         this.disable(disabled);
         //asign internal events
         this._assignEvents();
+        masterNode.data("CustomCR", this);
         //add callbacks
         if (attributes.onChange) {
             masterNode.on("crchange", attributes.onChange);
@@ -343,7 +344,8 @@ class CustomCR {
      */
     private _setChecked(checked:boolean):void {
         var attributes = this.attributes,
-            masterNode = attributes.masterNode;
+            masterNode = attributes.masterNode,
+            currentChecked = masterNode.prop("checked");
         if (attributes.disabled === false) {
             attributes.checked = checked;
             //update classes
@@ -356,9 +358,9 @@ class CustomCR {
             } else {
                 masterNode.removeAttr("checked");
             }
+            masterNode.prop("checked", checked);
             //if the property checked isn't equal to the new checked state, update the property and fire native change
-            if (masterNode.prop("checked") !== checked) {
-                masterNode.prop("checked", checked);
+            if (currentChecked !== checked) {
                 //prevent infinite loops
                 attributes.ignoreChangeEvent = true;
                 masterNode.trigger("change");
@@ -432,6 +434,24 @@ class CustomCR {
         }
     }
 
+    /**
+     * @description This function is invoked when any of the events are triggered.
+     * click:
+     * FalselyInput: When the falsely input is clicked, the algorithm detects if the type of the input is checkbox or radio and invoke check function</p>
+     * NativeInput: When the native input is clicked, the algorithm detects if the event has been triggered by the component and cancels the default behavior. Additionally, the propagation is prevented
+     * touchstart, mousedown
+     * FalselyInput: Set the active state to true.
+     * touchend, mouseup
+     * FalselyInput: Set the active state to false.
+     * mouseover
+     * FalselyInput: Set the mouseHover state to true. Touchend prevents mouseleave event on touch screen devices to fix the hover ghost issue.
+     * mouseout
+     * FalselyInput: Set the mouseHover state to false.
+     * change:
+     * NativeInput:
+     * @param e
+     * @private
+     */
     private _onEventTriggered(e:JQueryEventObject) {
         var data = e.data,
             instance = data.instance,
@@ -481,8 +501,8 @@ class CustomCR {
                 instance._updateHoverState(false);
                 break;
             case "change":
+                console.log("change", e);
                 if (instance.attributes.ignoreChangeEvent !== true) {
-                    console.log("change", e);
                     //if native input trigger check and isn't triggered by the component check for checked state
                     // first check the property checked
                     // if the property checked is the same that the checked attribute of the component
