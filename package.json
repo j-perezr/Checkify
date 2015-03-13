@@ -1,35 +1,36 @@
 {
-    "name": "customcr",
-    "title": "CustomCR",
-    "description": "Javascript ui component for customize checkboxes and radio buttons",
-    "version": "0.0.1",
-    "main": "dist/CustomCR.js",
-    "author": {
-        "name": "Javier Pérez Ruiz",
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/jperezruiz/CustomCR.git"
-    },
-    "keywords": [
-        "jquery",
-        "javascript",
-        "browser",
-        "custom input",
-        "custom checkbox",
-        "custom radio",
-        "custom radiobutton"
-    ],
-    "bugs": {
-        "url": "https://github.com/jperezruiz/CustomCR/issues"
-    },
-    "licenses": [
-        {
-            "type": "GNU 3.0",
-            "url": "https://github.com/jperezruiz/CustomCR/blob/master/LICENSE"
-        }
-    ],
-    "dependencies": {
-        "jquery":">= 1.10.0"
+  "name": "customcr",
+  "title": "CustomCR",
+  "description": "Javascript ui component for customize checkboxes and radio buttons",
+  "version": "0.0.1",
+  "main": "dist/CustomCR.js",
+  "author": {
+    "name": "Javier PÃ©rez Ruiz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jperezruiz/CustomCR.git"
+  },
+  "keywords": [
+    "jquery",
+    "javascript",
+    "browser",
+    "custom input",
+    "custom checkbox",
+    "custom radio",
+    "custom radiobutton"
+  ],
+  "bugs": {
+    "url": "https://github.com/jperezruiz/CustomCR/issues"
+  },
+  "licenses": [
+    {
+      "type": "GNU 3.0",
+      "url": "https://github.com/jperezruiz/CustomCR/blob/master/LICENSE"
     }
+  ],
+  "dependencies": {
+    "jquery": ">= 1.10.0",
+    "typescript": "^1.4.1"
+  }
 }
