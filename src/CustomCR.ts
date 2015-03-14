@@ -2,7 +2,7 @@
 "use strict";
 
 interface CustomCRParams {
-    masterNode : any;
+    masterNode : JQuery;
     checked? : boolean;
     wrap? : any;
     cssClass? : string;
@@ -22,11 +22,11 @@ interface CustomCRParams {
     onDisable? ();
 }
 interface CustomCRAttributes extends CustomCRParams {
-    wrapper? :any;
+    wrapper? :JQuery;
     touchEnd? : boolean;
     keyDown? : boolean;
-    falselyInput : any;
-    label : any;
+    falselyInput : JQuery;
+    label : JQuery;
     type : string;
     ignoreChangeEvent? : boolean;
 }
@@ -57,14 +57,14 @@ class CustomCR {
         wrap: false,
         disabled: false
     };
-    private attributes:CustomCRAttributes;
+    private _attributes:CustomCRAttributes;
 
     /**
      * @description Javascript component for customize inputs type checkbox and radiobutton. This component create a falsely input with markup and synchronize the states.
      * It's compatible with touch screen and accessible.
      * The component use the interaction with the native input, screan readers interact with the native input.     *
-     * @param   {json}              params                      Params for the component. All the parameters except listed below (except callbacks) could be indicated by data-customcr-* attributes on native input. Like &gt;input data-customcr-checked="true">
-     *                                                          <p>NOTE: All the uppercase letters will be preceded by - in data-customcr- attributes.</p>
+     * @param   {json}              params                      Params for the component. All the parameters except listed below (except callbacks) could be indicated by data-customcr-* _attributes on native input. Like &gt;input data-customcr-checked="true">
+     *                                                          <p>NOTE: All the uppercase letters will be preceded by - in data-customcr- _attributes.</p>
      *                                                          <p>For example, for the attribute classInput you have to use &gt;input data-customcr-class-input="classToAddToTheInput"></p>
      * @param   {(boolean|JSON)}    [params.wrap=false]         If true, the native input, falsely input and the label associated to the native input will be wrapped into a container.
      *                                                          <p>Also it's possible pass a json with extra configuration for the wrapper</p>
@@ -102,18 +102,18 @@ class CustomCR {
         //get input
         var attributes,
             masterNode = params.masterNode,
-            inputType:any,
-            falselyInput:any,
-            wrapper:any,
-            label:any,
+            inputType:string,
+            falselyInput:JQuery,
+            wrapper:JQuery,
+            label:JQuery,
             disabled:boolean,
             checked:boolean,
             mergedParams;
-        //merge params and data-* attributes
+        //merge params and data-* _attributes
         mergedParams = $.extend({}, params, CustomCR._extractDataAttributes(masterNode));
         //merge params and defaults
         attributes = $.extend({}, CustomCR._DEFAULTS, mergedParams);
-        this.attributes = attributes;
+        this._attributes = attributes;
         //prepare native input
         masterNode = $(masterNode);
         //masterNode is the native input
@@ -171,7 +171,7 @@ class CustomCR {
      * @private
      */
     private _assignEvents():void {
-        var attributes = this.attributes,
+        var attributes = this._attributes,
             falselyInput = attributes.falselyInput,
             masterNode = attributes.masterNode,
             label = attributes.label,
@@ -218,14 +218,15 @@ class CustomCR {
      * @returns {boolean}
      */
 
-    check(isChecked?:boolean) {
+    check(isChecked?:boolean):boolean {
         if (isChecked !== undefined) {
-            if (this.attributes.checked !== isChecked) {
+            if (this._attributes.checked !== isChecked) {
                 this._setChecked(isChecked);
-                this.attributes.masterNode.trigger("crchange", [this, isChecked]);
+                this._attributes.masterNode.trigger("crchange", [this, isChecked]);
+                return this._attributes.checked;
             }
         } else {
-            return this.attributes.checked;
+            return this._attributes.checked;
         }
     }
 
@@ -233,7 +234,7 @@ class CustomCR {
      * @description Refresh checked and disabled states if the attr disabled or checked property of the input was changed
      */
     refresh():void {
-        var attributes = this.attributes,
+        var attributes = this._attributes,
             masterNode = attributes.masterNode,
             disabled = masterNode.attr("disabled") !== undefined,
             checked = masterNode.prop("checked");
@@ -245,7 +246,7 @@ class CustomCR {
      * @description Toggle the checked state of the component.
      */
     toggle():void {
-        this.check(!this.attributes.checked);
+        this.check(!this._attributes.checked);
     }
 
     /**
@@ -254,8 +255,8 @@ class CustomCR {
      * If isDisabled argument isn't passed, return the current disable state.
      * @param isDisabled
      */
-    disable(isDisabled:boolean) {
-        var attributes = this.attributes,
+    disable(isDisabled:boolean):boolean {
+        var attributes = this._attributes,
             masterNode = attributes.masterNode;
         if (isDisabled !== undefined) {
             if (attributes.disabled !== isDisabled || masterNode.prop("disabled") !== attributes.disabled) {
@@ -267,9 +268,10 @@ class CustomCR {
                 } else {
                     masterNode.removeAttr("disabled");
                 }
+                return this._attributes.disabled;
             }
         } else {
-            return this.attributes.disabled;
+            return this._attributes.disabled;
         }
     }
 
@@ -282,7 +284,7 @@ class CustomCR {
      * @private
      */
     private _addCssClasses():void {
-        var attributes = this.attributes,
+        var attributes = this._attributes,
             masterNode = attributes.masterNode,
             label = attributes.label,
             falselyInput = attributes.falselyInput,
@@ -303,7 +305,7 @@ class CustomCR {
      * @returns {jQuery}
      * @protected
      */
-    private _createWrapper() {
+    private _createWrapper():JQuery {
         return $("<div></div>");
     }
 
@@ -312,19 +314,19 @@ class CustomCR {
      * @returns {jQuery}
      * @protected
      */
-    private _createFalseInput(type:string) {
+    private _createFalseInput(type:string):JQuery {
         return $("<i></i>");
     }
 
     /**
-     * @description Extract and normalize data-customcr-* attributes from a element.
-     * @param {jQuery} masterNode Element to extract attributes
+     * @description Extract and normalize data-customcr-* _attributes from a element.
+     * @param {jQuery} masterNode Element to extract _attributes
      * @returns {JSON}
      * @see http://api.jquery.com/jquery.data/
      * @private
      */
     private static _extractDataAttributes(masterNode):CustomCRParams {
-        //extract data-attributes
+        //extract data-_attributes
         var params = masterNode.data();
         var parsedParams = <CustomCRParams> {};
         for (var key in params) {
@@ -343,31 +345,24 @@ class CustomCR {
      * @param {boolean}     [checked]       New checked state. If true, the component and the input will be checked. If false, the component and the input will be unchecked.
      */
     private _setChecked(checked:boolean):void {
-        var attributes = this.attributes,
+        var attributes = this._attributes,
             masterNode = attributes.masterNode,
             currentChecked = masterNode.prop("checked");
         if (attributes.disabled === false) {
-            attributes.checked = checked;
-            //update classes
-            this._updateState(checked, (attributes.classChecked || CustomCR.CLASS_CHECKED));
-            //update aria state
-            attributes.falselyInput.attr("aria-checked", checked);
-            //update checked attribute
-            if (checked === true) {
-                masterNode.attr("checked", "checked");
+            if (checked === currentChecked) {
+                attributes.checked = currentChecked;
+                //update classes
+                this._updateState(checked, (attributes.classChecked || CustomCR.CLASS_CHECKED));
+                //update aria state
+                attributes.falselyInput.attr("aria-checked", checked);
+                //if type is radio, refresh the radios of the same group
+                if (attributes.type === "radio" && checked === true) {
+                    $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger("crrefresh");
+                }
             } else {
-                masterNode.removeAttr("checked");
-            }
-            masterNode.prop("checked", checked);
-            //if the property checked isn't equal to the new checked state, update the property and fire native change
-            if (currentChecked !== checked) {
-                //prevent infinite loops
-                attributes.ignoreChangeEvent = true;
-                masterNode.trigger("change");
-            }
-            //if type is radio, refresh the radios of the same group
-            if (attributes.type === "radio" && checked === true) {
-                $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger("crrefresh");
+                //If the checked property isn't equal to checked param, request to the input for update
+                //It's the input itself the responsible of manage his states
+                masterNode.trigger("click");
             }
         }
     }
@@ -379,7 +374,7 @@ class CustomCR {
      * @private
      */
     private _updateState(state:boolean, cssClass:string):void {
-        var attributes = this.attributes;
+        var attributes = this._attributes;
         if (attributes.disabled === false || attributes.masterNode.attr("disabled") === undefined) {
             if (state === true) {
                 attributes.falselyInput.addClass(cssClass);
@@ -398,29 +393,29 @@ class CustomCR {
     }
 
     private _updateHoverState(isHover:boolean):void {
-        this._updateState(isHover, (this.attributes.classHover || CustomCR.CLASS_HOVER));
+        this._updateState(isHover, (this._attributes.classHover || CustomCR.CLASS_HOVER));
     }
 
     private _updateActiveState(isActive:boolean):void {
-        this._updateState(isActive, (this.attributes.classActive || CustomCR.CLASS_ACTIVE));
+        this._updateState(isActive, (this._attributes.classActive || CustomCR.CLASS_ACTIVE));
     }
 
     private _updateFocusState(hasFocus:boolean):void {
-        this._updateState(hasFocus, (this.attributes.classFocus || CustomCR.CLASS_FOCUS));
+        this._updateState(hasFocus, (this._attributes.classFocus || CustomCR.CLASS_FOCUS));
     }
 
     private _onMouseOver():void {
-        if (this.attributes.touchEnd === false) {
+        if (this._attributes.touchEnd === false) {
             this._updateHoverState(true);
         } else {
-            this.attributes.touchEnd = false;
+            this._attributes.touchEnd = false;
         }
     }
 
     private _onKeyDown(e:KeyboardEvent):void {
         //control too much events
-        if (this.attributes.keyDown !== true) {
-            this.attributes.keyDown = true;
+        if (this._attributes.keyDown !== true) {
+            this._attributes.keyDown = true;
             if (e.keyCode === 13 || e.keyCode === 32) {
                 this._updateActiveState(true);
             }
@@ -428,7 +423,7 @@ class CustomCR {
     }
 
     private _onKeyUp(e:KeyboardEvent):void {
-        this.attributes.keyDown = false;
+        this._attributes.keyDown = false;
         if (e.keyCode === 13 || e.keyCode === 32) {
             this._updateActiveState(false);
         }
@@ -460,7 +455,7 @@ class CustomCR {
             case "click":
                 console.log("click", e);
                 var target = e.target,
-                    attributes = instance.attributes,
+                    attributes = instance._attributes,
                     masterNode = attributes.masterNode;
                 if (target === attributes.falselyInput.get(0)) {
                     if (attributes.type !== "radio" || masterNode.prop("checked") === false) {
@@ -501,22 +496,19 @@ class CustomCR {
                 instance._updateHoverState(false);
                 break;
             case "change":
-                console.log("change", e);
-                if (instance.attributes.ignoreChangeEvent !== true) {
-                    //if native input trigger check and isn't triggered by the component check for checked state
-                    // first check the property checked
-                    // if the property checked is the same that the checked attribute of the component
-                    // check the attribute checked
-                    var attributes = instance.attributes,
-                        masterNode = attributes.masterNode,
-                        checked = masterNode.prop("checked");
-                    if (checked === attributes.checked) {
-                        checked = masterNode.attr("checked") === undefined ? false : true;
-                    }
-                    instance.check(checked);
-                } else {
-                    instance.attributes.ignoreChangeEvent = false;
+                console.log("change", e)
+                //if native input trigger check and isn't triggered by the component check for checked state
+                // first check the property checked
+                // if the property checked is the same that the checked attribute of the component
+                // check the attribute checked
+                var attributes = instance._attributes,
+                    masterNode = attributes.masterNode,
+                    checked = masterNode.prop("checked");
+                if (checked === attributes.checked) {
+                    //checked = masterNode.attr("checked") === undefined ? false : true;
                 }
+                instance.check(checked);
+
                 break;
             case "focus":
                 console.log("focus", e);
@@ -538,7 +530,7 @@ class CustomCR {
     }
 
     private _onTouchEnd():void {
-        this.attributes.touchEnd = true;
+        this._attributes.touchEnd = true;
     }
 
     private _onRefreshEvent(e:JQueryEventObject):void {
