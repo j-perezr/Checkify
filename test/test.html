@@ -44,7 +44,6 @@
                 top: 0;
                 left: 0;
                 z-index: 0;
-                opacity: 0;
             }
         </style>
         <script type="text/javascript" src="../external/jquery-1.11.2.min.js"></script>
@@ -74,7 +73,9 @@
                 inputs.push(new CustomCR({
                     masterNode: current
                 }));
-
+                current.on("crrefresh crchange", function (e) {
+                    console.log(e, arguments)
+                });
             }
             /*$(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave", function (e) {
                 $(".log").append("<p>" + e.type + "</p>");

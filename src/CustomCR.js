@@ -111,7 +111,7 @@ var CustomCR = (function () {
         var attributes = this._attributes, falselyInput = attributes.falselyInput, masterNode = attributes.masterNode, label = attributes.label, assignEventsToFalselyInput = false;
         //masterNode.on("click"+this.EVENT_NAMESPACE,this._preventDefault);
         masterNode.on("click" + CustomCR.EVENT_NAMESPACE + " change" + CustomCR.EVENT_NAMESPACE + " focus" + CustomCR.EVENT_NAMESPACE + " blur" + CustomCR.EVENT_NAMESPACE + " keydown" + CustomCR.EVENT_NAMESPACE + " keyup" + CustomCR.EVENT_NAMESPACE, { instance: this }, this._onEventTriggered);
-        masterNode.on("crrefresh" + CustomCR.EVENT_NAMESPACE, { instance: this }, this._onRefreshEvent);
+        masterNode.on(CustomCR.EVENT_REFRESH + CustomCR.EVENT_NAMESPACE, { instance: this }, this._onRefreshEvent);
         //if label exists, assign events for mouse and touch (hover, active, focus)
         if (label) {
             label.on("touchstart" + CustomCR.EVENT_NAMESPACE + " touchend" + CustomCR.EVENT_NAMESPACE + " mousedown" + CustomCR.EVENT_NAMESPACE + " mouseup" + CustomCR.EVENT_NAMESPACE + " mouseover" + CustomCR.EVENT_NAMESPACE + " mouseout" + CustomCR.EVENT_NAMESPACE, { instance: this }, this._onEventTriggered);
@@ -137,8 +137,6 @@ var CustomCR = (function () {
         if (isChecked !== undefined) {
             if (this._attributes.checked !== isChecked) {
                 this._setChecked(isChecked);
-                this._attributes.masterNode.trigger("crchange", [this, isChecked]);
-                return this._attributes.checked;
             }
         }
         else {
@@ -178,7 +176,6 @@ var CustomCR = (function () {
                 else {
                     masterNode.removeAttr("disabled");
                 }
-                return this._attributes.disabled;
             }
         }
         else {
@@ -251,10 +248,15 @@ var CustomCR = (function () {
                 //update classes
                 this._updateState(checked, (attributes.classChecked || CustomCR.CLASS_CHECKED));
                 //update aria state
-                attributes.falselyInput.attr("aria-checked", checked);
                 //if type is radio, refresh the radios of the same group
+                attributes.falselyInput.attr("aria-checked", checked);
                 if (attributes.type === "radio" && checked === true) {
-                    $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger("crrefresh");
+                    ;
+                    $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger(CustomCR.EVENT_REFRESH);
+                    masterNode.trigger(CustomCR.EVENT_CHANGE);
+                }
+                else if (attributes.type === "checkbox") {
+                    masterNode.trigger(CustomCR.EVENT_CHANGE);
                 }
             }
             else {
@@ -343,7 +345,7 @@ var CustomCR = (function () {
         var data = e.data, instance = data.instance, type = e.type;
         switch (type) {
             case "click":
-                console.log("click", e);
+                //console.log("click", e);
                 var target = e.target, attributes = instance._attributes, masterNode = attributes.masterNode;
                 if (target === attributes.falselyInput.get(0)) {
                     if (attributes.type !== "radio" || masterNode.prop("checked") === false) {
@@ -359,33 +361,33 @@ var CustomCR = (function () {
                 }
                 break;
             case "touchstart":
-                console.log("touchstart", e);
+                //console.log("touchstart", e);
                 instance._updateActiveState(true);
                 break;
             case "touchend":
-                console.log("touchend", e);
+                //console.log("touchend", e);
                 instance._updateActiveState(false);
                 //control ghost hover in touch screens
                 instance._onTouchEnd();
                 break;
             case "mousedown":
-                console.log("mousedown", e);
+                //console.log("mousedown", e);
                 instance._updateActiveState(true);
                 break;
             case "mouseup":
-                console.log("mouseup", e);
+                //console.log("mouseup", e);
                 instance._updateActiveState(false);
                 break;
             case "mouseover":
-                console.log("mouseover", e);
+                //console.log("mouseover", e);
                 instance._onMouseOver();
                 break;
             case "mouseout":
-                console.log("mouseout", e);
+                //console.log("mouseout", e);
                 instance._updateHoverState(false);
                 break;
             case "change":
-                console.log("change", e);
+                //console.log("change", e)
                 //if native input trigger check and isn't triggered by the component check for checked state
                 // first check the property checked
                 // if the property checked is the same that the checked attribute of the component
@@ -396,19 +398,19 @@ var CustomCR = (function () {
                 instance.check(checked);
                 break;
             case "focus":
-                console.log("focus", e);
+                //console.log("focus", e);
                 instance._updateFocusState(true);
                 break;
             case "blur":
-                console.log("blur", e);
+                //console.log("blur", e);
                 instance._updateFocusState(false);
                 break;
             case "keydown":
-                console.log("keydown", e);
+                //console.log("keydown", e);
                 instance._onKeyDown(e);
                 break;
             case "keyup":
-                console.log("keyup", e);
+                //console.log("keyup", e);
                 instance._onKeyUp(e);
                 break;
         }
@@ -432,6 +434,7 @@ var CustomCR = (function () {
     CustomCR.CLASS_HOVER = "cr-hover";
     CustomCR.EVENT_CHANGE = "crchange";
     CustomCR.EVENT_DISABLED = "crdisable";
+    CustomCR.EVENT_REFRESH = "crrefresh";
     CustomCR.EVENT_NAMESPACE = ".customcr";
     //defaults params
     CustomCR._DEFAULTS = {
