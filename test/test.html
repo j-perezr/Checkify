@@ -73,12 +73,12 @@
                 inputs.push(new CustomCR({
                     masterNode: current
                 }));
-                current.on("crrefresh crchange", function (e) {
+                current.on("crrefresh crchange change click", function (e) {
                     console.log(e, arguments)
                 });
             }
             /*$(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave", function (e) {
-                $(".log").append("<p>" + e.type + "</p>");
+             $(".log").append("<p>" + e.type + "</p>");
              });*/
         </script>
     </body>

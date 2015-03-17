@@ -48,12 +48,12 @@ var CustomCR = (function () {
      */
     function CustomCR(params) {
         //get input
-        var attributes, masterNode = params.masterNode, inputType, falselyInput, wrapper, label, disabled, checked, mergedParams;
+        var _attributes, masterNode = params.masterNode, inputType, falselyInput, wrapper, label, disabled, checked, mergedParams;
         //merge params and data-* _attributes
         mergedParams = $.extend({}, params, CustomCR._extractDataAttributes(masterNode));
         //merge params and defaults
-        attributes = $.extend({}, CustomCR._DEFAULTS, mergedParams);
-        this._attributes = attributes;
+        _attributes = $.extend({}, CustomCR._DEFAULTS, mergedParams);
+        this._attributes = _attributes;
         //prepare native input
         masterNode = $(masterNode);
         //masterNode is the native input
@@ -61,46 +61,46 @@ var CustomCR = (function () {
         //find associated label
         label = $('label[for=' + masterNode.attr("id") + ']');
         //create falsely input
-        falselyInput = this._createFalseInput(inputType).attr("aria-role", inputType);
+        falselyInput = this._createFalseInput(inputType).attr("role", inputType);
         //insert falsely input and append native input into falselyInput
         falselyInput.insertAfter(masterNode).append(masterNode);
         //if wrap
-        if (attributes.wrap !== false) {
+        if (_attributes.wrap !== false) {
             wrapper = this._createWrapper();
-            if ("classWrapper" in attributes === false && (typeof attributes.wrap).toLowerCase() === "object") {
-                attributes.wrapperCssClass = attributes.wrap.cssClass;
+            if ("classWrapper" in _attributes === false && (typeof _attributes.wrap).toLowerCase() === "object") {
+                _attributes.classWrapper = _attributes.wrap.cssClass;
             }
             wrapper.insertAfter(falselyInput);
             wrapper.append(label);
             wrapper.append(falselyInput);
-            attributes.wrapper = wrapper;
+            _attributes.wrapper = wrapper;
         }
         //add classes to the markup
-        attributes.masterNode = masterNode;
-        attributes.type = inputType;
-        attributes.label = label;
-        attributes.falselyInput = falselyInput;
+        _attributes.masterNode = masterNode;
+        _attributes.type = inputType;
+        _attributes.label = label;
+        _attributes.falselyInput = falselyInput;
         //add css classes
         this._addCssClasses();
         //update checked state. If params didn't have checked attribute, component find native input state
-        checked = params.checked || (masterNode.attr("checked") !== undefined);
+        this._assignEvents();
+        checked = _attributes.checked !== undefined ? _attributes.checked : masterNode.attr("checked") !== undefined ? true : masterNode.prop("checked");
         this._setChecked(checked);
         //update disabled state. If params didn't have checked attribute, component find native input state
-        disabled = params.disabled || (masterNode.attr("disabled") !== undefined);
+        disabled = mergedParams.disabled !== undefined ? mergedParams.disabled : masterNode.attr("disabled") !== undefined ? true : masterNode.prop("disabled");
         this.disable(disabled);
         //asign internal events
-        this._assignEvents();
         masterNode.data("CustomCR", this);
         //add callbacks
-        if (attributes.onChange) {
-            masterNode.on("crchange", attributes.onChange);
-            attributes.onChange = null;
-            delete attributes.onChange;
+        if (_attributes.onChange) {
+            masterNode.on("crchange", _attributes.onChange);
+            _attributes.onChange = null;
+            delete _attributes.onChange;
         }
-        if (attributes.onDisabled) {
-            masterNode.on("crdisabled", attributes.onDisabled);
-            attributes.onDisabled = null;
-            delete attributes.onDisabled;
+        if (_attributes.onDisabled) {
+            masterNode.on("crdisabled", _attributes.onDisabled);
+            _attributes.onDisabled = null;
+            delete _attributes.onDisabled;
         }
     }
     /**
@@ -108,7 +108,7 @@ var CustomCR = (function () {
      * @private
      */
     CustomCR.prototype._assignEvents = function () {
-        var attributes = this._attributes, falselyInput = attributes.falselyInput, masterNode = attributes.masterNode, label = attributes.label, assignEventsToFalselyInput = false;
+        var _attributes = this._attributes, falselyInput = _attributes.falselyInput, masterNode = _attributes.masterNode, label = _attributes.label, assignEventsToFalselyInput = false;
         //masterNode.on("click"+this.EVENT_NAMESPACE,this._preventDefault);
         masterNode.on("click" + CustomCR.EVENT_NAMESPACE + " change" + CustomCR.EVENT_NAMESPACE + " focus" + CustomCR.EVENT_NAMESPACE + " blur" + CustomCR.EVENT_NAMESPACE + " keydown" + CustomCR.EVENT_NAMESPACE + " keyup" + CustomCR.EVENT_NAMESPACE, { instance: this }, this._onEventTriggered);
         masterNode.on(CustomCR.EVENT_REFRESH + CustomCR.EVENT_NAMESPACE, { instance: this }, this._onRefreshEvent);
@@ -147,7 +147,7 @@ var CustomCR = (function () {
      * @description Refresh checked and disabled states if the attr disabled or checked property of the input was changed
      */
     CustomCR.prototype.refresh = function () {
-        var attributes = this._attributes, masterNode = attributes.masterNode, disabled = masterNode.attr("disabled") !== undefined, checked = masterNode.prop("checked");
+        var _attributes = this._attributes, masterNode = _attributes.masterNode, disabled = masterNode.attr("disabled") !== undefined, checked = masterNode.prop("checked");
         this.check(checked);
         this.disable(disabled);
     };
@@ -164,12 +164,12 @@ var CustomCR = (function () {
      * @param isDisabled
      */
     CustomCR.prototype.disable = function (isDisabled) {
-        var attributes = this._attributes, masterNode = attributes.masterNode;
+        var _attributes = this._attributes, masterNode = _attributes.masterNode;
         if (isDisabled !== undefined) {
-            if (attributes.disabled !== isDisabled || masterNode.prop("disabled") !== attributes.disabled) {
-                attributes.disabled = isDisabled;
+            if (_attributes.disabled !== isDisabled || masterNode.prop("disabled") !== _attributes.disabled) {
+                _attributes.disabled = isDisabled;
                 masterNode.prop("disabled", isDisabled);
-                this._updateState(isDisabled, (attributes.classDisabled || CustomCR.CLASS_DISABLED));
+                this._updateState(isDisabled, (_attributes.classDisabled || CustomCR.CLASS_DISABLED));
                 if (isDisabled) {
                     masterNode.attr("disabled", "disabled");
                 }
@@ -189,14 +189,14 @@ var CustomCR = (function () {
      * @private
      */
     CustomCR.prototype._addCssClasses = function () {
-        var attributes = this._attributes, masterNode = attributes.masterNode, label = attributes.label, falselyInput = attributes.falselyInput, wrapper = attributes.wrapper;
-        masterNode.addClass((attributes.classInput || CustomCR.CLASS_INPUT));
-        falselyInput.addClass((attributes.classFalselyInput || CustomCR.CLASS_FALSELY_INPUT) + " " + (attributes.type === "checkbox" ? (attributes.classCheckbox || CustomCR.CLASS_CHECKBOX) : (attributes.classRadio || CustomCR.CLASS_RADIO)));
+        var _attributes = this._attributes, masterNode = _attributes.masterNode, label = _attributes.label, falselyInput = _attributes.falselyInput, wrapper = _attributes.wrapper;
+        masterNode.addClass((_attributes.classInput || CustomCR.CLASS_INPUT));
+        falselyInput.addClass((_attributes.classFalselyInput || CustomCR.CLASS_FALSELY_INPUT) + " " + (_attributes.type === "checkbox" ? (_attributes.classCheckbox || CustomCR.CLASS_CHECKBOX) : (_attributes.classRadio || CustomCR.CLASS_RADIO)));
         if (label) {
-            label.addClass((attributes.classLabel || CustomCR.CLASS_LABEL));
+            label.addClass((_attributes.classLabel || CustomCR.CLASS_LABEL));
         }
         if (wrapper) {
-            wrapper.addClass((attributes.classWrapper || CustomCR.CLASS_WRAPPER));
+            wrapper.addClass((_attributes.classWrapper || CustomCR.CLASS_WRAPPER));
         }
     };
     /**
@@ -231,6 +231,11 @@ var CustomCR = (function () {
             parsedKey = parsedKey.charAt(0).toLowerCase().concat(parsedKey.substring(1));
             parsedParams[parsedKey] = params[key];
         }
+        if ("classWrapper" in parsedParams) {
+            parsedParams["wrap"] = {
+                "cssClass": parsedParams["classWrapper"]
+            };
+        }
         return parsedParams;
     };
     /**
@@ -240,8 +245,10 @@ var CustomCR = (function () {
      * Refresh the radio of the same group
      * @param {boolean}     [checked]       New checked state. If true, the component and the input will be checked. If false, the component and the input will be unchecked.
      */
-    CustomCR.prototype._setChecked = function (checked) {
-        var attributes = this._attributes, masterNode = attributes.masterNode, currentChecked = masterNode.prop("checked");
+    /*private _setChecked(checked:boolean):void {
+        var attributes = this._attributes,
+            masterNode = attributes.masterNode,
+            currentChecked = masterNode.prop("checked");
         if (attributes.disabled === false) {
             if (checked === currentChecked) {
                 attributes.checked = currentChecked;
@@ -250,19 +257,51 @@ var CustomCR = (function () {
                 //update aria state
                 //if type is radio, refresh the radios of the same group
                 attributes.falselyInput.attr("aria-checked", checked);
+     if(checked === true){
+     masterNode.attr("checked","checked");
+     }else{
+     masterNode.removeAttr("checked");
+     }
                 if (attributes.type === "radio" && checked === true) {
-                    ;
                     $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger(CustomCR.EVENT_REFRESH);
                     masterNode.trigger(CustomCR.EVENT_CHANGE);
-                }
-                else if (attributes.type === "checkbox") {
+                } else if (attributes.type === "checkbox") {
                     masterNode.trigger(CustomCR.EVENT_CHANGE);
                 }
-            }
-            else {
+            } else {
                 //If the checked property isn't equal to checked param, request to the input for update
                 //It's the input itself the responsible of manage his states
+     attributes.ignoreChangeEvent = true;
                 masterNode.trigger("click");
+     this._setChecked(checked);
+            }
+        }
+     }*/
+    CustomCR.prototype._setChecked = function (checked) {
+        var _attributes = this._attributes, masterNode = _attributes.masterNode, currentChecked = masterNode.prop("checked");
+        if (_attributes.disabled === false) {
+            _attributes.checked = checked;
+            //update classes
+            this._updateState(checked, (_attributes.classChecked || CustomCR.CLASS_CHECKED));
+            //update aria state
+            _attributes.falselyInput.attr("aria-checked", checked);
+            //update checked attribute
+            if (checked === true) {
+                masterNode.attr("checked", "checked");
+            }
+            else {
+                masterNode.removeAttr("checked");
+            }
+            masterNode.prop("checked", checked);
+            //if the property checked isn't equal to the new checked state, update the property and fire native change
+            if (currentChecked !== checked) {
+                //prevent infinite loops
+                _attributes.ignoreChangeEvent = true;
+                masterNode.trigger("change");
+            }
+            //if type is radio, refresh the radios of the same group
+            if (_attributes.type === "radio" && checked === true) {
+                $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger("crrefresh");
             }
         }
     };
@@ -273,20 +312,20 @@ var CustomCR = (function () {
      * @private
      */
     CustomCR.prototype._updateState = function (state, cssClass) {
-        var attributes = this._attributes;
-        if (attributes.disabled === false || attributes.masterNode.attr("disabled") === undefined) {
+        var _attributes = this._attributes;
+        if (_attributes.disabled === false || _attributes.masterNode.attr("disabled") === undefined) {
             if (state === true) {
-                attributes.falselyInput.addClass(cssClass);
-                attributes.label.addClass(cssClass);
-                if (attributes.wrapper) {
-                    attributes.wrapper.addClass(cssClass);
+                _attributes.falselyInput.addClass(cssClass);
+                _attributes.label.addClass(cssClass);
+                if (_attributes.wrapper) {
+                    _attributes.wrapper.addClass(cssClass);
                 }
             }
             else {
-                attributes.falselyInput.removeClass(cssClass);
-                attributes.label.removeClass(cssClass);
-                if (attributes.wrapper) {
-                    attributes.wrapper.removeClass(cssClass);
+                _attributes.falselyInput.removeClass(cssClass);
+                _attributes.label.removeClass(cssClass);
+                if (_attributes.wrapper) {
+                    _attributes.wrapper.removeClass(cssClass);
                 }
             }
         }
@@ -346,9 +385,9 @@ var CustomCR = (function () {
         switch (type) {
             case "click":
                 //console.log("click", e);
-                var target = e.target, attributes = instance._attributes, masterNode = attributes.masterNode;
-                if (target === attributes.falselyInput.get(0)) {
-                    if (attributes.type !== "radio" || masterNode.prop("checked") === false) {
+                var target = e.target, _attributes = instance._attributes, masterNode = _attributes.masterNode;
+                if (target === _attributes.falselyInput.get(0) && _attributes.ignoreChangeEvent !== true) {
+                    if (_attributes.type !== "radio" || masterNode.prop("checked") === false) {
                         instance.check(!masterNode.prop("checked"));
                     }
                 }
@@ -358,6 +397,7 @@ var CustomCR = (function () {
                      *the propagation is canceled.
                      *This also control the propagation when native input is child of label (when label is clicked the native input trigger change)*/
                     e.stopPropagation();
+                    _attributes.ignoreChangeEvent = false;
                 }
                 break;
             case "touchstart":
@@ -392,10 +432,25 @@ var CustomCR = (function () {
                 // first check the property checked
                 // if the property checked is the same that the checked attribute of the component
                 // check the attribute checked
-                var attributes = instance._attributes, masterNode = attributes.masterNode, checked = masterNode.prop("checked");
-                if (checked === attributes.checked) {
+                var _attributes = instance._attributes, masterNode = _attributes.masterNode, checked = masterNode.prop("checked");
+                /*if (checked ===_attributes.checked) {
+                    //checked = masterNode.attr("checked") === undefined ? false : true;
                 }
-                instance.check(checked);
+                 instance.check(checked);*/
+                if (_attributes.ignoreChangeEvent !== true) {
+                    //if native input trigger check and isn't triggered by the component check for checked state
+                    // first check the property checked
+                    // if the property checked is the same that the checked attribute of the component
+                    // check the attribute checked
+                    var _attributes = instance._attributes, masterNode = _attributes.masterNode, checked = masterNode.prop("checked");
+                    if (checked === _attributes.checked) {
+                        checked = masterNode.attr("checked") === undefined ? false : true;
+                    }
+                    instance.check(checked);
+                }
+                else {
+                    _attributes.ignoreChangeEvent = false;
+                }
                 break;
             case "focus":
                 //console.log("focus", e);
