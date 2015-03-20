@@ -67,10 +67,10 @@ class CustomCR {
      * @param   {json}              params                      Params for the component. All the parameters except listed below (except callbacks) could be indicated by data-customcr-* _attributes on native input. Like &gt;input data-customcr-checked="true">
      *                                                          <p>NOTE: All the uppercase letters will be preceded by - in data-customcr- _attributes.</p>
      *                                                          <p>For example, for the attribute classInput you have to use &gt;input data-customcr-class-input="classToAddToTheInput"></p>
-     * @param   {(boolean|JSON)}    [params.wrap=false]         If true, the native input, falsely input and the label associated to the native input will be wrapped into a container.
-     *                                                          <p>Also it's possible pass a json with extra configuration for the wrapper</p>
-     * @param   {String}            [params.wrap.cssClass]      A String with css classes to add to the wrapper
-     *                                                          <p>For set this parameter by data-customcr- you have to use data-customcr-class-wrapper="classesToAdd"</p>
+     * @param   {(boolean|String)}    [params.wrap=false]       If true, the native input, falsely input and the label associated to the native input will be wrapped into a container.
+     *                                                          <p>Also it's possible pass a String. The string will be added as css class for the wrapper</p>
+     *                                                          <p>For set this parameter by data-customcr- you have to use data-customcr-wrapper="true" to add the wrapper</p>
+     *                                                          <p>For set class by data-customcr- you have to use data-customcr-class-wrapper="classesToAdd".</p>
      *                                                          <br>The container is created with the _createWrapper function. This function could be overwrite.
      * @param   {String}            [params.classWrapper]       String with css classes to add to the wrapper. Will replace the original css class
      * @param   {String}            [params.classInput]         String with css classes to add to the native input. Will replace the original css class.
@@ -115,6 +115,7 @@ class CustomCR {
         //merge params and defaults
         _attributes = $.extend({}, CustomCR._DEFAULTS, mergedParams);
         this._attributes = _attributes;
+        _attributes.disabled = false;
         //prepare native input
         masterNode = $(masterNode);
         //masterNode is the native input
@@ -130,8 +131,8 @@ class CustomCR {
         //if wrap
         if (_attributes.wrap !== false) {
             wrapper = this._createWrapper();
-            if ("classWrapper" in _attributes === false && (typeof _attributes.wrap).toLowerCase() === "object") {
-                _attributes.classWrapper = _attributes.wrap.cssClass;
+            if ("classWrapper" in _attributes === false && (typeof _attributes.wrap).toLowerCase() === "string") {
+                _attributes.classWrapper = _attributes.wrap;
             }
             wrapper.insertAfter(falselyInput);
             wrapper.append(label);
@@ -333,9 +334,7 @@ class CustomCR {
             parsedParams[parsedKey] = params[key];
         }
         if ("classWrapper" in parsedParams) {
-            parsedParams["wrap"] = {
-                "cssClass": parsedParams["classWrapper"]
-            }
+            parsedParams["wrap"] =  parsedParams["classWrapper"];
         }
         return parsedParams;
     }

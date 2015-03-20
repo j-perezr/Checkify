@@ -70,9 +70,9 @@
             var inputs = $("input");
             for (var cont = 0; cont < inputs.length; cont++) {
                 var current = $(inputs[cont]);
-                inputs.push(new CustomCR({
+                new CustomCR({
                     masterNode: current
-                }));
+                });
                 current.on("crrefresh crchange change click", function (e) {
                     console.log(e, arguments)
                 });
