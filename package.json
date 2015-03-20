@@ -2,7 +2,7 @@
   "name": "customcr",
   "title": "CustomCR",
   "description": "Javascript ui component for customize checkboxes and radio buttons",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "main": "dist/CustomCR.js",
   "author": {
     "name": "Javier Pérez Ruiz"

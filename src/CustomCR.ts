@@ -38,6 +38,7 @@ interface CustomCRAttributes extends CustomCRParams {
  * @use JQuery
  */
 class CustomCR {
+    static VERSION = "0.1.2";
     static CLASS_CHECKBOX = "cr-checkbox";
     static CLASS_RADIO = "cr-radio";
     static CLASS_CHECKED = "cr-checked";

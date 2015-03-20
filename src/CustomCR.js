@@ -481,6 +481,7 @@ var CustomCR = (function () {
     CustomCR.prototype._onRefreshEvent = function (e) {
         e.data.instance.refresh();
     };
+    CustomCR.VERSION = "0.1.2";
     CustomCR.CLASS_CHECKBOX = "cr-checkbox";
     CustomCR.CLASS_RADIO = "cr-radio";
     CustomCR.CLASS_CHECKED = "cr-checked";
