@@ -237,7 +237,13 @@ class CustomCR {
         var _attributes = this._attributes,
             masterNode = _attributes.masterNode,
             disabled = masterNode.attr("disabled") !== undefined,
+            checked = masterNode.attr("checked") !== undefined;
+        if(checked === _attributes.checked){
             checked = masterNode.prop("checked");
+        }
+        if(disabled === _attributes.disabled){
+            disabled = masterNode.prop("disabled");
+        }
         this.check(checked);
         this.disable(disabled);
     }

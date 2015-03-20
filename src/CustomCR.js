@@ -148,7 +148,13 @@ var CustomCR = (function () {
      * @description Refresh checked and disabled states if the attr disabled or checked property of the input was changed
      */
     CustomCR.prototype.refresh = function () {
-        var _attributes = this._attributes, masterNode = _attributes.masterNode, disabled = masterNode.attr("disabled") !== undefined, checked = masterNode.prop("checked");
+        var _attributes = this._attributes, masterNode = _attributes.masterNode, disabled = masterNode.attr("disabled") !== undefined, checked = masterNode.attr("checked") !== undefined;
+        if (checked === _attributes.checked) {
+            checked = masterNode.prop("checked");
+        }
+        if (disabled === _attributes.disabled) {
+            disabled = masterNode.prop("disabled");
+        }
         this.check(checked);
         this.disable(disabled);
     };

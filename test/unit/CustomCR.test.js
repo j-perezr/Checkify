@@ -377,7 +377,58 @@ describe("CustomCR Test", function () {
                 expect($radio.attr("checked")).not.be.undefined;
             });
         });
-        //toggle
         //refresh
+        describe("2.8 When the native input is modified externaly",function(){
+            describe("2.8.1 and checked attribute is modified in checkbox",function(){
+                it("checked property should be false",function(){
+                    $check.removeAttr("checked");
+                    instanceCheck.refresh();
+                    expect($check.prop("checked")).to.be.false;
+                });
+                it("checked attribute should be undefined",function(){
+                    expect($check.attr("checked")).be.undefined;
+                });
+            });
+            describe("2.8.2 and checked property is modified in checkbox",function(){
+                it("checked attribute should not be undefined",function(){
+                    $check.prop("checked",true);
+                    instanceCheck.refresh();
+                    expect($check.attr("checked")).not.be.undefined;
+                });
+                it("checked component attribute should be true",function(){
+                    expect(instanceCheck.check()).to.be.true;
+                });
+            });
+            describe("2.8.4 and disabled property is modified in checkbox",function(){
+                it("disabled attribute should not be undefined",function(){
+                    $check.prop("disabled",true);
+                    instanceCheck.refresh();
+                    expect($check.attr("disabled")).not.be.undefined;
+                });
+                it("disabled component attribute should be true",function(){
+                    expect(instanceCheck.disable()).to.be.true;
+                });
+                it("couldn't be operated",function(){
+                    instanceCheck.check(false);
+                    expect(instanceCheck.check()).to.be.true;
+                });
+            });
+            describe("2.8.5 and disabled attribute is modified in checkbox",function(){
+                it("disabled property should be false",function(){
+                    $check.removeAttr("disabled");
+                    instanceCheck.refresh();
+                    expect($check.prop("disabled")).to.be.false;
+                });
+                it("disabled component attribute should be false",function(){
+                    expect(instanceCheck.disable()).to.be.false;
+                });
+                it("could be operated",function(){
+                    instanceCheck.check(false);
+                    expect(instanceCheck.check()).to.be.false;
+                });
+            });
+
+        });
+
     });
 })
