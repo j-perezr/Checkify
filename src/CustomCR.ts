@@ -149,13 +149,11 @@ class CustomCR {
         this._addCssClasses();
         //update checked state. If params didn't have checked attribute, component find native input state
         this._assignEvents();
-        checked = _attributes.checked !== undefined ? _attributes.checked : masterNode.attr("checked") !== undefined ? true : masterNode.prop("checked");
+        checked = _attributes.checked != undefined ? _attributes.checked : masterNode.attr("checked") != undefined ? true : masterNode.prop("checked");
         this._setChecked(checked);
         //update disabled state. If params didn't have checked attribute, component find native input state
-        disabled = mergedParams.disabled !== undefined ? mergedParams.disabled : masterNode.attr("disabled") !== undefined ? true : masterNode.prop("disabled");
+        disabled = mergedParams.disabled != undefined ? mergedParams.disabled : masterNode.attr("disabled") != undefined ? true : masterNode.prop("disabled");
         this.disable(disabled);
-        //asign internal events
-        masterNode.data("CustomCR", this);
         //add callbacks
         if (_attributes.onChange) {
             masterNode.on("crchange", _attributes.onChange);
@@ -196,7 +194,7 @@ class CustomCR {
             " mouseover" + CustomCR.EVENT_NAMESPACE +
             " mouseout" + CustomCR.EVENT_NAMESPACE, {instance: this}, this._onEventTriggered);
             //if the label is the parent of falselyInput, assign click event to the label
-            if (falselyInput.parents("label").length === 0) {
+            if (label.children(falselyInput).length === 0) {
                 assignEventsToFalselyInput = true;
             }
         }
@@ -212,6 +210,7 @@ class CustomCR {
         }
     }
 
+
     /**
      * @description Set or get the checked state of the component.
      * If isChecked argument is passed, the component will be changed to isChecked state.
@@ -222,7 +221,7 @@ class CustomCR {
      */
 
     check(isChecked?:boolean):boolean {
-        if (isChecked !== undefined) {
+        if (isChecked != undefined) {
             if (this._attributes.checked !== isChecked) {
                 this._setChecked(isChecked);
             }
@@ -237,8 +236,8 @@ class CustomCR {
     refresh():void {
         var _attributes = this._attributes,
             masterNode = _attributes.masterNode,
-            disabled = masterNode.attr("disabled") !== undefined,
-            checked = masterNode.attr("checked") !== undefined;
+            disabled = masterNode.attr("disabled") != undefined,
+            checked = masterNode.attr("checked") != undefined;
         if(checked === _attributes.checked){
             checked = masterNode.prop("checked");
         }
@@ -265,7 +264,7 @@ class CustomCR {
     disable(isDisabled:boolean):boolean {
         var _attributes = this._attributes,
             masterNode = _attributes.masterNode;
-        if (isDisabled !== undefined) {
+        if (isDisabled != undefined) {
             if (_attributes.disabled !== isDisabled || masterNode.prop("disabled") !== _attributes.disabled) {
                 masterNode.prop("disabled", isDisabled);
                 this._updateState(isDisabled, (_attributes.classDisabled || CustomCR.CLASS_DISABLED));
@@ -281,7 +280,7 @@ class CustomCR {
         }
     }
 
-    private destroy() {
+    private destroy():void {
 
     }
 
@@ -422,7 +421,7 @@ class CustomCR {
      */
     private _updateState(state:boolean, cssClass:string):void {
         var _attributes = this._attributes;
-        if (_attributes.disabled === false || _attributes.masterNode.attr("disabled") === undefined) {
+        if (_attributes.disabled === false || _attributes.masterNode.attr("disabled") == undefined) {
             if (state === true) {
                 _attributes.falselyInput.addClass(cssClass);
                 _attributes.label.addClass(cssClass);
@@ -549,7 +548,7 @@ class CustomCR {
                     masterNode = _attributes.masterNode,
                     checked = masterNode.prop("checked");
                 /*if (checked ===_attributes.checked) {
-                    //checked = masterNode.attr("checked") === undefined ? false : true;
+                 //checked = masterNode.attr("checked") == undefined ? false : true;
                 }
                  instance.check(checked);*/
                 if (_attributes.ignoreChangeEvent !== true) {
@@ -561,7 +560,7 @@ class CustomCR {
                         masterNode = _attributes.masterNode,
                         checked = masterNode.prop("checked");
                     if (checked === _attributes.checked) {
-                        checked = masterNode.attr("checked") === undefined ? false : true;
+                        checked = masterNode.attr("checked") == undefined ? false : true;
                     }
                     instance.check(checked);
                 } else {
@@ -595,3 +594,49 @@ class CustomCR {
         e.data.instance.refresh();
     }
 }
+;
+//Based on jquery widget integration
+$.fn.customCR = function (options) {
+    var isMethodCall = typeof options === "string",
+        args = Array.prototype.slice.call(arguments, 1);
+
+    var stack = [];
+    if (isMethodCall) {
+        this.each(function () {
+            var methodValue,
+                instance = $(this).data("CustomCR");
+            if (options === "instance") {
+                stack.push(instance);
+            } else {
+                if (!instance) {
+                    return $.error("cannot call methods on CustomCR prior to initialization; " +
+                    "attempted to call method '" + options + "'");
+                }
+                if (!$.isFunction(instance[options]) || options.charAt(0) === "_") {
+                    return $.error("no such method '" + options + "' for CustomCR instance");
+                }
+                if (options == "destroy") {
+                    $(this).data("CustomCR", null);
+                }
+                methodValue = instance[options].apply(instance, args);
+                if (methodValue !== instance && methodValue !== undefined) {
+                    stack.push(methodValue);
+                }
+            }
+        });
+    } else {
+
+        this.each(function () {
+            var instance = $(this).data("CustomCR");
+            if (instance == undefined) {
+                options = options || {};
+                options.masterNode = $(this);
+                instance = new CustomCR(options);
+                $(this).data("CustomCR", instance);
+                stack.push(instance);
+            }
+        });
+    }
+
+    return stack.length === 1 ? stack[0] : stack;
+};
