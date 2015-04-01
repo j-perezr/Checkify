@@ -213,6 +213,31 @@ class CustomCR {
     }
 
     /**
+     * @description Remove internal assigned events.
+     * @private
+     */
+    private _removeEvents():void {
+        var _attributes = this._attributes,
+            falselyInput = _attributes.falselyInput,
+            masterNode = _attributes.masterNode,
+            label = _attributes.label,
+            assignEventsToFalselyInput = false;
+        //masterNode.on("click"+this.EVENT_NAMESPACE,this._preventDefault);
+        masterNode.off(CustomCR.EVENT_NAMESPACE);
+        //if label exists, assign events for mouse and touch (hover, active, focus)
+        if (label) {
+            label.off(CustomCR.EVENT_NAMESPACE);
+            //if the label is the parent of falselyInput, assign click event to the label
+            if (label.children(falselyInput).length === 0) {
+                assignEventsToFalselyInput = true;
+            }
+        }
+        //if the label is the parent of falselyInput, is not necessary assign events to the falselyInput because mouse and touch events always be triggered on label. This improve event management
+        if (assignEventsToFalselyInput === true) {
+            falselyInput.off(CustomCR.EVENT_NAMESPACE);
+        }
+    }
+    /**
      * @description Set or get the checked state of the component.
      * If isChecked argument is passed, the component will be changed to isChecked state.
      * If isChecked argument isn't passed, return the current checked state.
@@ -281,10 +306,34 @@ class CustomCR {
         }
     }
 
-    private destroy() {
-
+    /**
+     * @description Destroy the component, remove created markup, remove added css clases and restore markup.
+     */
+    destroy():void {
+        var _attributes = this._attributes,
+            masterNode = _attributes.masterNode,
+            falselyInput = _attributes.falselyInput,
+            label = _attributes.label,
+            wrapper = _attributes.wrapper;
+        //remove handlers
+        _attributes.disabled = true;
+        this._removeEvents();
+        //remove markup
+        if (wrapper != undefined) {
+            wrapper.after(wrapper.children());
+            wrapper.remove();
+        }
+        masterNode.insertAfter(falselyInput);
+        falselyInput.remove();
+        label.removeClass((_attributes.classLabel || CustomCR.CLASS_LABEL));
+        if (label.length > 0 && label.attr("class").length === 0) {
+            label.removeAttr("class");
+        }
+        masterNode.removeClass((_attributes.classInput || CustomCR.CLASS_INPUT));
+        if (masterNode.attr("class").length === 0) {
+            masterNode.removeAttr("class");
+        }
     }
-
     /**
      * @description Add the necessary classes to the markup
      * @private
