@@ -174,7 +174,6 @@ var CustomCR = (function () {
         var _attributes = this._attributes, masterNode = _attributes.masterNode;
         if (isDisabled !== undefined) {
             if (_attributes.disabled !== isDisabled || masterNode.prop("disabled") !== _attributes.disabled) {
-                _attributes.disabled = isDisabled;
                 masterNode.prop("disabled", isDisabled);
                 this._updateState(isDisabled, (_attributes.classDisabled || CustomCR.CLASS_DISABLED));
                 if (isDisabled) {
@@ -183,6 +182,7 @@ var CustomCR = (function () {
                 else {
                     masterNode.removeAttr("disabled");
                 }
+                _attributes.disabled = isDisabled;
             }
         }
         else {
@@ -345,7 +345,7 @@ var CustomCR = (function () {
         this._updateState(hasFocus, (this._attributes.classFocus || CustomCR.CLASS_FOCUS));
     };
     CustomCR.prototype._onMouseOver = function () {
-        if (this._attributes.touchEnd === false) {
+        if (this._attributes.touchEnd !== true) {
             this._updateHoverState(true);
         }
         else {
@@ -406,19 +406,14 @@ var CustomCR = (function () {
                 }
                 break;
             case "touchstart":
-                //console.log("touchstart", e);
-                instance._updateActiveState(true);
-                break;
-            case "touchend":
-                //console.log("touchend", e);
-                instance._updateActiveState(false);
-                //control ghost hover in touch screens
-                instance._onTouchEnd();
-                break;
             case "mousedown":
                 //console.log("mousedown", e);
                 instance._updateActiveState(true);
                 break;
+            case "touchend":
+                //console.log("touchend", e);
+                //control ghost hover in touch screens
+                instance._onTouchEnd();
             case "mouseup":
                 //console.log("mouseup", e);
                 instance._updateActiveState(false);
