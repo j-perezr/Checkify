@@ -1,10 +1,9 @@
-describe("CustomCR Test", function () {
+describe("Checkify Test", function () {
     //Loading fixtures for testing
-    var f = jasmine.getFixtures();
-    f.fixturesPath = 'base';
-    f.load('test/unit/CustomCR.test.html');
+    fixture.setBase('test/unit');
+    fixture.load('Checkify.test.html');
     //caching chai assert
-    var assert = chai.assert;
+    //var assert = chai.assert;
     var expect = chai.expect;
     describe('1. Initialization', function () {
         //Check parameters config
@@ -13,7 +12,7 @@ describe("CustomCR Test", function () {
             var $test1Container = $("#test1Container");
             describe('1.1 Without label', function () {
                 var $elem = $test1Container.find("#test11");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem
                 });
                 // correct instanciated
@@ -24,13 +23,13 @@ describe("CustomCR Test", function () {
                 //basic markup created
                 it('Should have conainer with css class and role', function () {
                     expect(falselyInput.children().get(0)).to.equal($elem.get(0));
-                    expect(falselyInput.hasClass(CustomCR.CLASS_FALSELY_INPUT)).to.be.true;
+                    expect(falselyInput.hasClass(Checkify.CLASS_FALSELY_INPUT)).to.be.true;
                     expect(falselyInput.attr("role")).to.equal("checkbox");
                 });
                 it('Should have a class according to the type', function () {
-                    var cssClass = CustomCR.CLASS_CHECKBOX;
+                    var cssClass = Checkify.CLASS_CHECKBOX;
                     if ($elem.attr("type") === "Radio") {
-                        cssClass = CustomCR.CLASS_RADIO;
+                        cssClass = Checkify.CLASS_RADIO;
                     }
                     expect(falselyInput.hasClass(cssClass)).to.be.true;
                 });
@@ -47,13 +46,13 @@ describe("CustomCR Test", function () {
             //Test 1.2 - Basic init with label
             describe('1.2. With label', function () {
                 var $elem = $test1Container.find("#test12");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem
                 });
                 //label
                 var label = $test1Container.find("[for='" + $elem.attr("id") + "']");
                 it('The label associated should have a class', function () {
-                    expect(label.hasClass(CustomCR.CLASS_LABEL)).to.be.true;
+                    expect(label.hasClass(Checkify.CLASS_LABEL)).to.be.true;
                     expect(label.get(0)).to.equal(instance._attributes.label.get(0));
                 });
             });
@@ -61,7 +60,7 @@ describe("CustomCR Test", function () {
             //Test 1.3 - Type radio
             describe("1.3. and it's a radio", function () {
                 var $elem = $test1Container.find("#test13");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem
                 });
                 // correct instanciated
@@ -72,13 +71,13 @@ describe("CustomCR Test", function () {
                 //basic markup created
                 it('Should have conainer with css class and role', function () {
                     expect(falselyInput.children().get(0)).to.equal($elem.get(0));
-                    expect(falselyInput.hasClass(CustomCR.CLASS_FALSELY_INPUT)).to.be.true;
+                    expect(falselyInput.hasClass(Checkify.CLASS_FALSELY_INPUT)).to.be.true;
                     expect(falselyInput.attr("role")).to.equal("radio");
                 });
                 it('Should have a class according to the typè', function () {
-                    var cssClass = CustomCR.CLASS_CHECKBOX;
+                    var cssClass = Checkify.CLASS_CHECKBOX;
                     if ($elem.attr("type") === "radio") {
-                        cssClass = CustomCR.CLASS_RADIO;
+                        cssClass = Checkify.CLASS_RADIO;
                     }
                     expect(falselyInput.hasClass(cssClass)).to.be.true;
                 });
@@ -94,7 +93,7 @@ describe("CustomCR Test", function () {
             // Test 1.4 - html attributes
             describe("1.4. With disabled and checked attributes", function () {
                 var $elem = $test1Container.find("#test14");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem
                 });
                 // correct instanciated
@@ -104,7 +103,7 @@ describe("CustomCR Test", function () {
                     expect($elem.prop("checked")).to.be.true;
                 });
                 it("Should have class check", function () {
-                    expect(falselyInput.hasClass(CustomCR.CLASS_CHECKED)).to.be.true;
+                    expect(falselyInput.hasClass(Checkify.CLASS_CHECKED)).to.be.true;
                 });
                 it("Attribute disabled of component should be true", function () {
                     expect(instance.disable()).to.be.true;
@@ -121,7 +120,7 @@ describe("CustomCR Test", function () {
             //Test 1.5 - html attributes vs params
             describe("1.5. Has html attributes and json params.", function () {
                 var $elem = $test1Container.find("#test15");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem,
                     disabled: false,
                     checked: false
@@ -133,7 +132,7 @@ describe("CustomCR Test", function () {
                     expect($elem.prop("checked")).to.be.false;
                 });
                 it("Shouldn't have class check", function () {
-                    expect(falselyInput.hasClass(CustomCR.CLASS_CHECKED)).to.be.false;
+                    expect(falselyInput.hasClass(Checkify.CLASS_CHECKED)).to.be.false;
                 });
                 it("Attribute of component disabled should be false", function () {
                     expect(instance.disable()).to.be.false;
@@ -148,77 +147,77 @@ describe("CustomCR Test", function () {
                 });
             });
             // Test 1.6, init with data-* attributes checkbox
-            describe("1.6. And use data-customcr-* attributes for all (checkbox)", function () {
+            describe("1.6. And use data-checkify-* attributes for all (checkbox)", function () {
                 var $elem = $test1Container.find("#test16");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem,
                     disabled: false,
                     checked: false
                 });
-                it("Should have a wrapper and wrapper should have the data-customcr-wrapper value", function () {
+                it("Should have a wrapper and wrapper should have the data-checkify-wrapper value", function () {
                     expect(instance._attributes).to.include.keys("wrapper");
                     expect(instance._attributes.wrapper.find(instance._attributes.masterNode)).to.have.length.of.at.least(1);
-                    expect(instance._attributes.wrapper.hasClass($elem.data("customcrClassWrapper"))).to.be.true;
+                    expect(instance._attributes.wrapper.hasClass($elem.data("checkifyClassWrapper"))).to.be.true;
                 });
-                it("The native input should have the data-customcr-class-input value", function () {
-                    expect($elem.hasClass($elem.data("customcrClassInput"))).to.be.true;
+                it("The native input should have the data-checkify-class-input value", function () {
+                    expect($elem.hasClass($elem.data("checkifyClassInput"))).to.be.true;
                 });
-                it("The falsely input should have the data-customcr-class-falsely-input value", function () {
-                    expect(instance._attributes.falselyInput.hasClass($elem.data("customcrClassFalselyInput"))).to.be.true;
+                it("The falsely input should have the data-checkify-class-falsely-input value", function () {
+                    expect(instance._attributes.falselyInput.hasClass($elem.data("checkifyClassFalselyInput"))).to.be.true;
                 });
-                it("The falsely input of type checkbox should have the data-customcr-class-checkbox value", function () {
-                    expect(instance._attributes.falselyInput.hasClass($elem.data("customcrClassCheckbox"))).to.be.true;
+                it("The falsely input of type checkbox should have the data-checkify-class-checkbox value", function () {
+                    expect(instance._attributes.falselyInput.hasClass($elem.data("checkifyClassCheckbox"))).to.be.true;
                 });
-                it("Should be disabled and should have the data-customcr-class-disabled value", function () {
+                it("Should be disabled and should have the data-checkify-class-disabled value", function () {
                     expect(instance.disable()).to.be.true;
                     expect($elem.prop("disabled")).to.be.true;
                     expect($elem.attr("disabled")).not.be.undefined;
-                    expect(instance._attributes.falselyInput.hasClass($elem.data("customcrClassFalselyInput"))).to.be.true;
+                    expect(instance._attributes.falselyInput.hasClass($elem.data("checkifyClassFalselyInput"))).to.be.true;
                 });
-                it("Should be checked and should have the data-customcr-class-checked value", function () {
+                it("Should be checked and should have the data-checkify-class-checked value", function () {
                     expect(instance.check()).to.be.true;
                     expect($elem.prop("checked")).to.be.true;
-                    expect(instance._attributes.falselyInput.hasClass($elem.data("customcrClassChecked"))).to.be.true;
+                    expect(instance._attributes.falselyInput.hasClass($elem.data("checkifyClassChecked"))).to.be.true;
                 });
             });
             // Test 1.7, init with data-* attributes checkbox
-            describe("1.7. And use data-customcr-* attributes for all (radio)", function () {
+            describe("1.7. And use data-checkify-* attributes for all (radio)", function () {
                 var $elem = $test1Container.find("#test17");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem,
                     disabled: false,
                     checked: false
                 });
-                it("Should have a wrapper and wrapper should have the data-customcr-wrapper value", function () {
+                it("Should have a wrapper and wrapper should have the data-checkify-wrapper value", function () {
                     expect(instance._attributes).to.include.keys("wrapper");
                     expect(instance._attributes.wrapper.find(instance._attributes.masterNode)).to.have.length.of.at.least(1);
-                    expect(instance._attributes.wrapper.hasClass($elem.data("customcrClassWrapper"))).to.be.true;
+                    expect(instance._attributes.wrapper.hasClass($elem.data("checkifyClassWrapper"))).to.be.true;
                 });
-                it("The native input should have the data-customcr-class-input value", function () {
-                    expect($elem.hasClass($elem.data("customcrClassInput"))).to.be.true;
+                it("The native input should have the data-checkify-class-input value", function () {
+                    expect($elem.hasClass($elem.data("checkifyClassInput"))).to.be.true;
                 });
-                it("The falsely input should have the data-customcr-class-falsely-input value", function () {
-                    expect(instance._attributes.falselyInput.hasClass($elem.data("customcrClassFalselyInput"))).to.be.true;
+                it("The falsely input should have the data-checkify-class-falsely-input value", function () {
+                    expect(instance._attributes.falselyInput.hasClass($elem.data("checkifyClassFalselyInput"))).to.be.true;
                 });
-                it("The falsely input of type checkbox should have the data-customcr-class-checkbox value", function () {
-                    expect(instance._attributes.falselyInput.hasClass($elem.data("customcrClassRadio"))).to.be.true;
+                it("The falsely input of type checkbox should have the data-checkify-class-checkbox value", function () {
+                    expect(instance._attributes.falselyInput.hasClass($elem.data("checkifyClassRadio"))).to.be.true;
                 });
-                it("Should be disabled and should have the data-customcr-class-disabled value", function () {
+                it("Should be disabled and should have the data-checkify-class-disabled value", function () {
                     expect(instance.disable()).to.be.true;
                     expect($elem.prop("disabled")).to.be.true;
                     expect($elem.attr("disabled")).not.be.undefined;
-                    expect(instance._attributes.falselyInput.hasClass($elem.data("customcrClassFalselyInput"))).to.be.true;
+                    expect(instance._attributes.falselyInput.hasClass($elem.data("checkifyClassFalselyInput"))).to.be.true;
                 });
-                it("Should be checked and should have the data-customcr-class-checked value", function () {
+                it("Should be checked and should have the data-checkify-class-checked value", function () {
                     expect(instance.check()).to.be.true;
                     expect($elem.prop("checked")).to.be.true;
-                    expect(instance._attributes.falselyInput.hasClass($elem.data("customcrClassChecked"))).to.be.true;
+                    expect(instance._attributes.falselyInput.hasClass($elem.data("checkifyClassChecked"))).to.be.true;
                 });
             });
             // Wrap configurations
             describe("1.8. And wrap config is boolean", function () {
                 var $elem = $test1Container.find("#test18");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem,
                     wrap: true
                 });
@@ -229,7 +228,7 @@ describe("CustomCR Test", function () {
             });
             describe("1.9. And wrap config is string", function () {
                 var $elem = $test1Container.find("#test19");
-                var instance = new CustomCR({
+                var instance = new Checkify({
                     masterNode: $elem,
                     wrap: "wrapper"
                 });
@@ -248,18 +247,18 @@ describe("CustomCR Test", function () {
     //events
     //wrapper
     //wrapper as an object
-    //init data-customcr-* attributes
+    //init data-checkify-* attributes
     //checked
     //disabled
     //classes
     describe('2. Functions & methods.', function () {
         var $test2Container = $("#test2Container");
         var $check = $test2Container.find("#test21");
-        var instanceCheck = new CustomCR({
+        var instanceCheck = new Checkify({
             masterNode: $check
         });
         var $radio = $test2Container.find("#test22");
-        var instanceRadio = new CustomCR({
+        var instanceRadio = new Checkify({
             masterNode: $radio
         });
         //Test over check function
@@ -273,7 +272,7 @@ describe("CustomCR Test", function () {
         });
         describe('2.2 When check function is invoked with true param', function () {
             var $radio2 = $test2Container.find("#test23");
-            var instanceRadio2 = new CustomCR({
+            var instanceRadio2 = new Checkify({
                 masterNode: $radio2
             });
             before(function () {
@@ -489,11 +488,11 @@ describe("CustomCR Test", function () {
         // Without label
         describe("3.1 Click event", function () {
             var $check = $test3Container.find("#test31"),
-                instanceCheck = new CustomCR({
+                instanceCheck = new Checkify({
                     masterNode: $check
                 }),
                 $radio = $test3Container.find("#test32"),
-                instanceRadio = new CustomCR({
+                instanceRadio = new Checkify({
                     masterNode: $radio
                 });
             describe("3.1.1 When input don't have a label", function () {
@@ -573,11 +572,11 @@ describe("CustomCR Test", function () {
             // Label not parent
             describe("3.1.2 When input have a label", function () {
                 var $check = $test3Container.find("#test33"),
-                    instanceCheck = new CustomCR({
+                    instanceCheck = new Checkify({
                         masterNode: $check
                     }),
                     $radio = $test3Container.find("#test34"),
-                    instanceRadio = new CustomCR({
+                    instanceRadio = new Checkify({
                         masterNode: $radio
                     }),
                     $falselyCheck = $test3Container.find("[for='" + $check.attr("id") + "']"),
@@ -696,11 +695,11 @@ describe("CustomCR Test", function () {
             // Label parent
             describe("3.1.3 and input have a parent label", function () {
                 var $check = $test3Container.find("#test35"),
-                    instanceCheck = new CustomCR({
+                    instanceCheck = new Checkify({
                         masterNode: $check
                     }),
                     $radio = $test3Container.find("#test36"),
-                    instanceRadio = new CustomCR({
+                    instanceRadio = new Checkify({
                         masterNode: $radio
                     }),
                     $falselyCheck = $test3Container.find("[for='" + $check.attr("id") + "']"),
@@ -819,11 +818,11 @@ describe("CustomCR Test", function () {
         });
         describe("3.2. Mousdown & mouseup", function () {
             var $check = $test3Container.find("#test33"),
-                instanceCheck = new CustomCR({
+                instanceCheck = new Checkify({
                     masterNode: $check
                 }),
                 $radio = $test3Container.find("#test34"),
-                instanceRadio = new CustomCR({
+                instanceRadio = new Checkify({
                     masterNode: $radio
                 }),
                 $falselyCheck = $test3Container.find("[for='" + $check.attr("id") + "']"),
@@ -835,8 +834,8 @@ describe("CustomCR Test", function () {
                         $radio.trigger("mousedown");
                     });
                     it("falsely input should have a class", function () {
-                        expect($falselyCheck.hasClass(CustomCR.CLASS_ACTIVE)).to.be.true;
-                        expect($falselyRadio.hasClass(CustomCR.CLASS_ACTIVE)).to.be.true;
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
                     })
                 });
                 describe("3.2.1.2 and mouseup is triggered by native input", function () {
@@ -845,8 +844,8 @@ describe("CustomCR Test", function () {
                         $radio.trigger("mouseup");
                     });
                     it("falsely input shouldn't have a class", function () {
-                        expect($falselyCheck.hasClass(CustomCR.CLASS_ACTIVE)).to.be.false;
-                        expect($falselyRadio.hasClass(CustomCR.CLASS_ACTIVE)).to.be.false;
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
                     })
                 });
                 describe("3.2.1.3 and mousedown is triggered by falsely input", function () {
@@ -855,8 +854,8 @@ describe("CustomCR Test", function () {
                         $falselyRadio.trigger("mousedown");
                     });
                     it("falsely input should have a class", function () {
-                        expect($falselyCheck.hasClass(CustomCR.CLASS_ACTIVE)).to.be.true;
-                        expect($falselyRadio.hasClass(CustomCR.CLASS_ACTIVE)).to.be.true;
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
                     });
                 });
                 describe("3.2.1.4 and mouseup is triggered by falsely input", function () {
@@ -865,18 +864,18 @@ describe("CustomCR Test", function () {
                         $falselyRadio.trigger("mouseup");
                     });
                     it("falsely input shouldn't have a class", function () {
-                        expect($falselyCheck.hasClass(CustomCR.CLASS_ACTIVE)).to.be.false;
-                        expect($falselyRadio.hasClass(CustomCR.CLASS_ACTIVE)).to.be.false;
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
                     });
                 });
             });
             describe("3.2. Mouseover & mouseout", function () {
                 var $check = $test3Container.find("#test33"),
-                    instanceCheck = new CustomCR({
+                    instanceCheck = new Checkify({
                         masterNode: $check
                     }),
                     $radio = $test3Container.find("#test34"),
-                    instanceRadio = new CustomCR({
+                    instanceRadio = new Checkify({
                         masterNode: $radio
                     }),
                     $falselyCheck = $test3Container.find("[for='" + $check.attr("id") + "']"),
@@ -888,8 +887,8 @@ describe("CustomCR Test", function () {
                             $radio.trigger("mouseover");
                         });
                         it("falsely input should have a class", function () {
-                            expect($falselyCheck.hasClass(CustomCR.CLASS_HOVER)).to.be.true;
-                            expect($falselyRadio.hasClass(CustomCR.CLASS_HOVER)).to.be.true;
+                            expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.true;
+                            expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.true;
                         })
                     });
                     describe("3.2.1.2 and mouseout is triggered by native input", function () {
@@ -898,8 +897,8 @@ describe("CustomCR Test", function () {
                             $radio.trigger("mouseout");
                         });
                         it("falsely input should have a class", function () {
-                            expect($falselyCheck.hasClass(CustomCR.CLASS_HOVER)).to.be.false;
-                            expect($falselyRadio.hasClass(CustomCR.CLASS_HOVER)).to.be.false;
+                            expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.false;
+                            expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.false;
                         })
                     });
                     describe("3.2.1.3 and mousehover is triggered by falsely input", function () {
@@ -909,8 +908,8 @@ describe("CustomCR Test", function () {
                         });
 
                         it("falsely input shouldn't have a class", function () {
-                            expect($falselyCheck.hasClass(CustomCR.CLASS_HOVER)).to.be.true;
-                            expect($falselyRadio.hasClass(CustomCR.CLASS_HOVER)).to.be.true;
+                            expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.true;
+                            expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.true;
                         });
                     });
                     describe("3.2.1.4 and mouseout is triggered by falsely input", function () {
@@ -919,8 +918,8 @@ describe("CustomCR Test", function () {
                             $falselyRadio.trigger("mouseout");
                         });
                         it("falsely input shouldn't have a class", function () {
-                            expect($falselyCheck.hasClass(CustomCR.CLASS_HOVER)).to.be.false;
-                            expect($falselyRadio.hasClass(CustomCR.CLASS_HOVER)).to.be.false;
+                            expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.false;
+                            expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.false;
                         });
                     });
                 });

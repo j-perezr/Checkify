@@ -1,0 +1,80 @@
+.ch-input {
+    $BG-check: #fff;
+    $BG-check_checked: #009688;
+    $BR-check: #5a5a5a;
+    $BR-check_checked: #009688;
+    $BR-check_tic: #fff;
+    position: relative;
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    border-radius: 2px;
+    background-color: $BG-check;
+    border: 2px solid $BR-check;
+    cursor: pointer;
+    // tic
+    &:after {
+        // hide before checked
+        display: none;
+        position: absolute;
+        top: 0.15em;
+        left: 0.13em;
+        content: "";
+        height: 0.3em;
+        width: 0.7em;
+        border-left: 2px solid $BR-check_tic;
+        border-bottom: 2px solid $BR-check_tic;
+        transform: rotate(-45deg);
+    }
+    //shadow
+    &:before {
+        content: "";
+        position: absolute;
+        opacity: 0;
+        top: 50%;
+        left: 50%;
+        margin-top: 0;
+        margin-left: 0;
+        width: 0;
+        height: 0;
+        z-index: 1;
+        opacity: 0.54;
+        background-color: #5a5f5a;
+        border-radius: 54%;
+        transition: 0.1s;
+    }
+    &.ch-checked {
+        background-color: $BG-check_checked;
+        border-color: $BR-check_checked;
+        //show tick
+        &:after {
+            display: block;
+        }
+    }
+    //mouse down
+    &.ch-active {
+        position: relative;
+        z-index: 2;
+        &:after {
+            z-index: 0;
+        }
+        //show shadow
+        &:before {
+            opacity: 0.54;
+            width: 2.5em;
+            height: 2.5em;
+            margin-top: -1.25em;
+            margin-left: -1.25em;
+        }
+
+    }
+    //"hide" native input
+    .ch-nativeInput {
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        padding: 0;
+        margin: 0;
+    }
+
+}

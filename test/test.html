@@ -1,85 +1,86 @@
 <!DOCTYPE html>
 <html lang = "es">
-        <meta charset="UTF-8">
-        <title></title>
-        <style>
-            /*.cr-input {
-                position: relative;
-                width: 20px;
-                height: 20px;
-                display: inline-block;
-                border: 1px solid;
-                z-index: 1;
-            }
+    <meta charset = "UTF-8">
+    <title></title>
+    <style>
+        /*.cr-input {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border: 1px solid;
+            z-index: 1;
+        }
 
-            .myCheckboxClass {
-                border: 4px dotted orange;
-            }
-            .cr-radio {
-                border-radius: 50%;
-            }
-            .cr-hover.cr-active,
-            .cr-active {
-                background: red;
-            }
+        .myCheckboxClass {
+            border: 4px dotted orange;
+        }
+        .cr-radio {
+            border-radius: 50%;
+        }
+        .cr-hover.cr-active,
+        .cr-active {
+            background: red;
+        }
 
-            .cr-hover {
-                background: blue;
-            }
+        .cr-hover {
+            background: blue;
+        }
 
-            .cr-focus {
-                border-color: chocolate;
-            }
+        .cr-focus {
+            border-color: chocolate;
+        }
 
-            .cr-checked,
-            .cr-checked.cr-hover,
-            .cr-checked.cr-active,
-            .cr-checked.cr-hover.cr-active {
-                background-color: darkgreen;
-            }
+        .cr-checked,
+        .cr-checked.cr-hover,
+        .cr-checked.cr-active,
+        .cr-checked.cr-hover.cr-active {
+            background-color: darkgreen;
+        }
 
-            .cr-nativeInput {
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: 0;
-            }*/
-        </style>
-        <script type="text/javascript" src="../external/jquery-1.11.2.min.js"></script>
-        <script type="text/javascript" src="../src/CustomCR.js"></script>
+        .cr-nativeInput {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }*/
+    </style>
+    <script type = "text/javascript" src = "../external/jquery-1.11.2.min.js"></script>
+    <script type = "text/javascript" src = "../src/Checkify.js"></script>
     <link rel = "stylesheet" type = "text/css" href = "../src/themes/material-light.css"/>
     </head>
     <body>
+        <input data-checkify-class-wrapper = "wrapper" type = "checkbox">
         <p>Checkbo inside label</p>
-        <label for="test">Test
-            <input id="test" type="checkbox"/>
+        <label for = "test">Test
+            <input id = "test" type = "checkbox"/>
         </label>
         <p>Checkbox alone with data-customcr-class-checkbox</p>
-        <input data-customcr-class-checkbox="myCheckboxClass" type="checkbox"/>
+        <input data-checkify-class-wrapper = "true" data-customcr-class-checkbox = "myCheckboxClass" type = "checkbox"/>
         <p>Radio insde label</p>
-        <label for="testradio">Testradio input as child of label
-            <input id="testradio" type="radio" name="a">
+        <label for = "testradio">Testradio input as child of label
+            <input data-checkify-class-wrapper = "true" id = "testradio" type = "radio" name = "a">
         </label>
         <p>Radio at same level of his label</p>
-        <label for="testradio2">Testradio input at same level of label</label>
-        <input id="testradio2" type="radio" name="a">
+        <label for = "testradio2">Testradio input at same level of label</label>
+        <input data-checkify-class-wrapper = "true" id = "testradio2" type = "radio" name = "a">
 
-        <div class="log"></div>
+        <div class = "log"></div>
 
-        <script type="text/javascript">
+        <script type = "text/javascript">
             var inputs = $("input");
             for (var cont = 0; cont < inputs.length; cont++) {
                 var current = $(inputs[cont]);
-                new CustomCR({
+                new Checkify({
                     masterNode: current
                 });
                 current.on("crrefresh crchange change click", function (e) {
                     console.log(e, arguments)
                 });
             }
-            /*$(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave", function (e) {
-             $(".log").append("<p>" + e.type + "</p>");
-             });*/
+            $(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave", function (e) {
+                $(".log").append("<p>" + e.type + "</p>");
+            });
         </script>
     </body>
 </html>
