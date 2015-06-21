@@ -34,8 +34,6 @@
   },
   "devDependencies": {
     "chai": "^2.1.1",
-    "jasmine-core": "^2.2.0",
-    "jasmine-jquery": "^2.0.6",
     "karma": "^0.12.31",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^0.1.7",

@@ -10,7 +10,8 @@ var Checkify = (function () {
     /**
      * @description Javascript component for customize inputs type checkbox and radiobutton. This component create a falsely input with markup and synchronize the states.
      * It's compatible with touch screen and accessible.
-     * The component use the interaction with the native input, screan readers interact with the native input.     *
+     * The component use the interaction with the native input, screan readers interact with the native input.
+     * @param   {JQuery}            elem                        Input native to customize.
      * @param   {json}              params                      Params for the component. All the parameters except listed below (except callbacks) could be indicated by data-checkify-* _attributes on native input. Like &gt;input data-checkify-checked="true">
      *                                                          <p>NOTE: All the uppercase letters will be preceded by - in data-checkify- _attributes.</p>
      *                                                          <p>For example, for the attribute classInput you have to use &gt;input data-checkify-class-input="classToAddToTheInput"></p>
@@ -41,76 +42,225 @@ var Checkify = (function () {
      *                                                              <li>By data-checkify-checked attribute on native input</li>
      *                                                              <li>By checked attribute on native input</li>
      *                                                          </ul>
-     * @param   {function}          [params.onChange]              Event handler for crchange event. It's the same that $(selectorOfInput).on("crchange",function);
-     * @param   {function}          [params.onDisable]             Event handler for crdisable event. It's the same that $(selectorOfInput).on("crdisable",function);
+     * @param   {function}          [params.onCreate]              Event handler for crcreate event. Event triggered after finish the initialization
+     * @param   {function}          [params.onChange]              Event handler for crchange event. It's the same that $(selectorOfInput).on("checkify:change",function);
+     * @param   {function}          [params.onDisable]             Event handler for crdisable event. It's the same that $(selectorOfInput).on("checkify:disable",function);
      * @constructor
      */
-    function Checkify(params) {
+    function Checkify(elem, params) {
         //get input
-        var _attributes, masterNode = params.masterNode, inputType, falselyInput, wrapper, label, disabled, checked, mergedParams;
-        //merge params and data-* _attributes
-        mergedParams = $.extend({}, params, Checkify._extractDataAttributes(masterNode));
-        //merge params and defaults
-        _attributes = $.extend({}, Checkify._DEFAULTS, mergedParams);
-        this._attributes = _attributes;
-        _attributes.disabled = false;
-        //prepare native input
-        masterNode = $(masterNode);
-        //masterNode is the native input
-        inputType = masterNode.attr("type");
-        //find associated label
-        label = $('label[for=' + masterNode.attr("id") + ']');
-        //create falsely input
-        falselyInput = this._createFalseInput(inputType).attr("role", inputType);
-        //insert falsely input and append native input into falselyInput
-        falselyInput.insertAfter(masterNode).append(masterNode);
-        //if wrap
-        if (_attributes.wrap !== false) {
-            wrapper = this._createWrapper();
-            if (label.length > 0) {
-                wrapper.insertAfter(label);
-                if (label.children(falselyInput).length > 0) {
-                    wrapper.append(label);
+        var _attributes, masterNode = $(elem), inputType, falselyInput, wrapper, label, disabled, checked, mergedParams;
+        if (masterNode.is(":checkbox") || masterNode.is(":radio")) {
+            //merge params and data-* _attributes
+            mergedParams = $.extend({}, params, Checkify._extractDataAttributes(masterNode));
+            //merge params and defaults
+            _attributes = $.extend({}, Checkify._DEFAULTS, mergedParams);
+            this._attributes = _attributes;
+            _attributes.disabled = false;
+            _attributes.slavesDisabled = 0;
+            _attributes.slavesChecked = 0;
+            _attributes.ignoreMasterChange = false;
+            _attributes.ignoreSlaveChange = false;
+            //init vars
+            _attributes.$controls = _attributes.$controls || $();
+            _attributes.$controlsFormControl = _attributes.$controlsFormControl || $();
+            //prepare native input
+            masterNode = $(masterNode);
+            //masterNode is the native input
+            inputType = masterNode.attr("type");
+            //find associated label
+            label = $('label[for=' + masterNode.attr("id") + ']');
+            //create falsely input
+            falselyInput = this._createFalseInput(inputType).attr("role", inputType);
+            //insert falsely input and append native input into falselyInput
+            falselyInput.insertAfter(masterNode).append(masterNode);
+            //if wrap
+            if (_attributes.wrap !== false) {
+                wrapper = this._createWrapper();
+                if (label.length > 0) {
+                    wrapper.insertAfter(label);
+                    if (label.children(falselyInput).length > 0) {
+                        wrapper.append(label);
+                    }
+                    else {
+                        wrapper.append(label);
+                        wrapper.append(falselyInput);
+                    }
                 }
                 else {
-                    wrapper.append(label);
+                    wrapper.insertAfter(falselyInput);
                     wrapper.append(falselyInput);
+                }
+                _attributes.wrapper = wrapper;
+            }
+            //add classes to the markup
+            _attributes.masterNode = masterNode;
+            _attributes.type = inputType;
+            _attributes.label = label;
+            _attributes.falselyInput = falselyInput;
+            //add css classes
+            this._addCssClasses();
+            //update checked state. If params didn't have checked attribute, component find native input state
+            this._assignEvents();
+            this.addToControl(_attributes.controls);
+            checked = _attributes.checked !== undefined ? _attributes.checked : masterNode.attr("checked") !== undefined ? true : masterNode.prop("checked");
+            this._setChecked(checked);
+            //update disabled state. If params didn't have checked attribute, component find native input state
+            disabled = mergedParams.disabled !== undefined ? mergedParams.disabled : masterNode.attr("disabled") !== undefined ? true : masterNode.prop("disabled");
+            this.disable(disabled);
+            //asign internal events
+            masterNode.data("Checkify", this);
+            //add callbacks
+            if (_attributes.onChange) {
+                masterNode.on("crchange", _attributes.onChange);
+                _attributes.onChange = null;
+                delete _attributes.onChange;
+            }
+            if (_attributes.onDisabled) {
+                masterNode.on("crdisabled", _attributes.onDisabled);
+                _attributes.onDisabled = null;
+                delete _attributes.onDisabled;
+            }
+        }
+        else {
+            throw "Checkify: Invalid element. Only input type checkbox and radio are allowed";
+        }
+    }
+    Checkify.prototype._onSlaveDisableStateChange = function (e, instance, disabled) {
+        if (disabled === true) {
+            this._attributes.slavesDisabled++;
+        }
+        else {
+            this._attributes.slavesDisabled--;
+        }
+    };
+    Checkify.prototype._onSlaveChange = function (e) {
+        var instance = e.data.instance, _attributes = instance._attributes;
+        //update num of slaves checked
+        if (this.checked === true) {
+            _attributes.slavesChecked++;
+        }
+        else {
+            _attributes.slavesChecked--;
+        }
+        //if the change of the master shoudn't be ignored
+        if (_attributes.ignoreMasterChange !== true) {
+            // check the slaves checked and disabled
+            if ((_attributes.slavesChecked + _attributes.slavesDisabled) == _attributes.$controls.length) {
+                _attributes.ignoreSlaveChange = true;
+                instance.check(true);
+                _attributes.ignoreSlaveChange = false;
+            }
+            else {
+                //if the master is checked
+                if (instance.check() === true) {
+                    _attributes.ignoreSlaveChange = true;
+                    instance.check(false);
+                    _attributes.ignoreSlaveChange = false;
+                }
+            }
+        }
+    };
+    Checkify.prototype.addToControl = function (elems) {
+        //If the param is a query
+        if (elems != null) {
+            if (typeof elems === "string") {
+                //Split in order to extract queries
+                var elemsQuery = elems.split(" ");
+                //Store queries
+                this._attributes.controls = this._attributes.controls.concat(" ", elemsQuery.join());
+                for (var queryIndex = 0, elemsQueryLength = elemsQuery.length; queryIndex < elemsQueryLength; queryIndex++) {
+                    var currentQuery = elemsQuery[queryIndex], items;
+                    //Find checkify: keyword to identify checkify groups
+                    if (currentQuery.search("checkify:") !== -1) {
+                        //find items of the group
+                        items = $("[data-checkify-group='" + currentQuery.replace("checkify:", "") + "']");
+                    }
+                    else {
+                        //if string doesn't contains checkify: keyword
+                        items = $(currentQuery);
+                    }
+                    //recursi
+                    this.addToControl(items);
                 }
             }
             else {
-                wrapper.insertAfter(falselyInput);
-                wrapper.append(falselyInput);
+                var $controls = this._attributes.$controls, $controlsFormControl = this._attributes.$controlsFormControl;
+                for (var elemsIndex = 0, elemsLength = elems.length; elemsIndex < elemsLength; elemsIndex++) {
+                    var currentElem = $(elems[elemsIndex]);
+                    //if the slave isn't registered yet
+                    //if slave is a checkbox or radio input
+                    if (currentElem.is(":checkbox") || currentElem.is(":radio")) {
+                        if ($controls.index(currentElem) === -1) {
+                            //check states
+                            if (currentElem.prop("checked") === true) {
+                                this._attributes.slavesChecked++;
+                            }
+                            if (currentElem.prop("disabled") === true) {
+                                this._attributes.slavesDisabled++;
+                            }
+                            //register slave
+                            currentElem.on("change" + ".slave", { instance: this }, this._onSlaveChange);
+                            $.merge($controls, currentElem);
+                        }
+                    }
+                    else if ((currentElem.is("input") || currentElem.is("select")) && $controlsFormControl.index(currentElem) === -1) {
+                        $.merge($controlsFormControl, (currentElem));
+                    }
+                }
             }
-            _attributes.wrapper = wrapper;
         }
-        //add classes to the markup
-        _attributes.masterNode = masterNode;
-        _attributes.type = inputType;
-        _attributes.label = label;
-        _attributes.falselyInput = falselyInput;
-        //add css classes
-        this._addCssClasses();
-        //update checked state. If params didn't have checked attribute, component find native input state
-        this._assignEvents();
-        checked = _attributes.checked !== undefined ? _attributes.checked : masterNode.attr("checked") !== undefined ? true : masterNode.prop("checked");
-        this._setChecked(checked);
-        //update disabled state. If params didn't have checked attribute, component find native input state
-        disabled = mergedParams.disabled !== undefined ? mergedParams.disabled : masterNode.attr("disabled") !== undefined ? true : masterNode.prop("disabled");
-        this.disable(disabled);
-        //asign internal events
-        masterNode.data("Checkify", this);
-        //add callbacks
-        if (_attributes.onChange) {
-            masterNode.on("crchange", _attributes.onChange);
-            _attributes.onChange = null;
-            delete _attributes.onChange;
+    };
+    Checkify.prototype.removeOfControl = function (elems) {
+        //If the param is a query
+        if (elems != null) {
+            if (typeof elems === "string") {
+                //Split in order to extract queries
+                var elemsQuery = elems.split(" ");
+                //Store queries
+                this._attributes.controls = this._attributes.controls.replace("," + elemsQuery.join(), "");
+                for (var queryIndex = 0, elemsQueryLength = elemsQuery.length; queryIndex < elemsQueryLength; queryIndex++) {
+                    var currentQuery = elemsQuery[queryIndex], items;
+                    //Find checkify: keyword to identify checkify groups
+                    if (currentQuery.search("checkify:") !== -1) {
+                        //find items of the group
+                        items = $("[data-checkify-group='" + currentQuery.replace("checkify:", "") + "']");
+                    }
+                    else {
+                        //if string doesn't contains checkify: keyword
+                        items = $(currentQuery);
+                    }
+                    //recursi
+                    this.removeOfControl(items);
+                }
+            }
+            else {
+                var $controls = this._attributes.$controls, $controlsFormControl = this._attributes.$controlsFormControl;
+                for (var elemsIndex = 0, elemsLength = elems.length; elemsIndex < elemsLength; elemsIndex++) {
+                    var currentElem = $(elems[elemsIndex]);
+                    //if the slave isn't registered yet
+                    //if slave is a checkbox or radio input
+                    if (currentElem.is(":checkbox") || currentElem.is(":radio")) {
+                        if ($controls.index(currentElem) !== -1) {
+                            //check states
+                            if (currentElem.prop("checked") === true) {
+                                this._attributes.slavesChecked--;
+                            }
+                            if (currentElem.prop("disabled") === true) {
+                                this._attributes.slavesDisabled--;
+                            }
+                            //register slave
+                            currentElem.off("change" + ".slave");
+                            $controls.splice($controls.index(currentElem), 1);
+                        }
+                    }
+                    else if ((currentElem.is("input") || currentElem.is("select")) && $controlsFormControl.index(currentElem) === -1) {
+                        $controlsFormControl.splice($controlsFormControl.index(currentElem));
+                    }
+                }
+            }
         }
-        if (_attributes.onDisabled) {
-            masterNode.on("crdisabled", _attributes.onDisabled);
-            _attributes.onDisabled = null;
-            delete _attributes.onDisabled;
-        }
-    }
+    };
     /**
      * @description Event assignment
      * @private
@@ -118,11 +268,11 @@ var Checkify = (function () {
     Checkify.prototype._assignEvents = function () {
         var _attributes = this._attributes, falselyInput = _attributes.falselyInput, masterNode = _attributes.masterNode, label = _attributes.label, assignEventsToFalselyInput = false;
         //masterNode.on("click"+this.EVENT_NAMESPACE,this._preventDefault);
-        masterNode.on("click" + Checkify.EVENT_NAMESPACE + " change" + Checkify.EVENT_NAMESPACE + " focus" + Checkify.EVENT_NAMESPACE + " blur" + Checkify.EVENT_NAMESPACE + " keydown" + Checkify.EVENT_NAMESPACE + " keyup" + Checkify.EVENT_NAMESPACE, {instance: this}, this._onEventTriggered);
-        masterNode.on(Checkify.EVENT_REFRESH + Checkify.EVENT_NAMESPACE, {instance: this}, this._onRefreshEvent);
+        masterNode.on("click" + Checkify.EVENT_NAMESPACE + " change" + Checkify.EVENT_NAMESPACE + " focus" + Checkify.EVENT_NAMESPACE + " blur" + Checkify.EVENT_NAMESPACE + " keydown" + Checkify.EVENT_NAMESPACE + " keyup" + Checkify.EVENT_NAMESPACE, { instance: this }, this._onEventTriggered);
+        masterNode.on(Checkify.EVENT_REFRESH + Checkify.EVENT_NAMESPACE, { instance: this }, this._onRefreshEvent);
         //if label exists, assign events for mouse and touch (hover, active, focus)
         if (label) {
-            label.on("touchstart" + Checkify.EVENT_NAMESPACE + " touchend" + Checkify.EVENT_NAMESPACE + " mousedown" + Checkify.EVENT_NAMESPACE + " mouseup" + Checkify.EVENT_NAMESPACE + " mouseover" + Checkify.EVENT_NAMESPACE + " mouseout" + Checkify.EVENT_NAMESPACE, {instance: this}, this._onEventTriggered);
+            label.on("touchstart" + Checkify.EVENT_NAMESPACE + " touchend" + Checkify.EVENT_NAMESPACE + " mousedown" + Checkify.EVENT_NAMESPACE + " mouseup" + Checkify.EVENT_NAMESPACE + " mouseover" + Checkify.EVENT_NAMESPACE + " mouseout" + Checkify.EVENT_NAMESPACE, { instance: this }, this._onEventTriggered);
             //if the label is the parent of falselyInput, assign click event to the label
             if (falselyInput.parents("label").length === 0) {
                 assignEventsToFalselyInput = true;
@@ -130,7 +280,7 @@ var Checkify = (function () {
         }
         //if the label is the parent of falselyInput, is not necessary assign events to the falselyInput because mouse and touch events always be triggered on label. This improve event management
         if (assignEventsToFalselyInput === true) {
-            falselyInput.on("click" + Checkify.EVENT_NAMESPACE + " touchstart" + Checkify.EVENT_NAMESPACE + " touchend" + Checkify.EVENT_NAMESPACE + " mousedown" + Checkify.EVENT_NAMESPACE + " mouseup" + Checkify.EVENT_NAMESPACE + " mouseover" + Checkify.EVENT_NAMESPACE + " mouseout" + Checkify.EVENT_NAMESPACE, {instance: this}, this._onEventTriggered);
+            falselyInput.on("click" + Checkify.EVENT_NAMESPACE + " touchstart" + Checkify.EVENT_NAMESPACE + " touchend" + Checkify.EVENT_NAMESPACE + " mousedown" + Checkify.EVENT_NAMESPACE + " mouseup" + Checkify.EVENT_NAMESPACE + " mouseover" + Checkify.EVENT_NAMESPACE + " mouseout" + Checkify.EVENT_NAMESPACE, { instance: this }, this._onEventTriggered);
         }
     };
     /**
@@ -289,8 +439,54 @@ var Checkify = (function () {
             }
         }
      }*/
+    Checkify.prototype._updateSlaves = function (checked) {
+        var _attributes = this._attributes;
+        if (_attributes.ignoreSlaveChange !== true) {
+            _attributes.ignoreMasterChange = true;
+            var slaves = _attributes.$controls;
+            for (var slaveIndex = 0, slavesLength = slaves.length; slaveIndex < slavesLength; slaveIndex++) {
+                var currentSlave = $(slaves[slaveIndex]);
+                if (currentSlave.data("Checkify") !== undefined) {
+                    currentSlave.checkify("check", checked);
+                }
+            }
+            _attributes.ignoreMasterChange = false;
+        }
+        if (checked === true) {
+            switch (_attributes.controlsAction) {
+                case "disable":
+                    _attributes.$controlsFormControl.attr("disabled", "disabled");
+                    break;
+                case "enable":
+                    _attributes.$controlsFormControl.removeAttr("disabled");
+                    break;
+                case "hide":
+                    _attributes.$controlsFormControl.hide();
+                    break;
+                case "show":
+                    _attributes.$controlsFormControl.show();
+                    break;
+            }
+        }
+        else {
+            switch (_attributes.controlsAction) {
+                case "disable":
+                    _attributes.$controlsFormControl.removeAttr("disabled");
+                    break;
+                case "enable":
+                    _attributes.$controlsFormControl.attr("disabled", "disabled");
+                    break;
+                case "hide":
+                    _attributes.$controlsFormControl.show();
+                    break;
+                case "show":
+                    _attributes.$controlsFormControl.hide();
+                    break;
+            }
+        }
+    };
     Checkify.prototype._setChecked = function (checked) {
-        var _attributes = this._attributes, masterNode = _attributes.masterNode, currentChecked = masterNode.prop("checked");
+        var _attributes = this._attributes, masterNode = _attributes.masterNode, currentChecked = masterNode.prop("checked"), slaves;
         if (_attributes.disabled === false) {
             _attributes.checked = checked;
             //update classes
@@ -305,15 +501,20 @@ var Checkify = (function () {
                 masterNode.removeAttr("checked");
             }
             masterNode.prop("checked", checked);
+            this._updateSlaves(checked);
             //if the property checked isn't equal to the new checked state, update the property and fire native change
             if (currentChecked !== checked) {
                 //prevent infinite loops
                 _attributes.ignoreChangeEvent = true;
+                masterNode.trigger(Checkify.EVENT_CHANGE, [this, _attributes.checked]);
                 masterNode.trigger("change");
             }
             //if type is radio, refresh the radios of the same group
-            if (_attributes.type === "radio" && checked === true) {
-                $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger(Checkify.EVENT_REFRESH);
+            if (_attributes.type === "radio") {
+                if (checked === true) {
+                    masterNode.trigger(Checkify.EVENT_CHANGE, [this, _attributes.checked]);
+                    $("[name='" + masterNode.attr("name") + "']").not(masterNode).trigger(Checkify.EVENT_REFRESH);
+                }
             }
         }
     };
@@ -496,14 +697,56 @@ var Checkify = (function () {
     Checkify.CLASS_DISABLED = "ch-disabled";
     Checkify.CLASS_HOVER = "ch-hover";
     Checkify.EVENT_CHANGE = "checkify:change";
+    Checkify.EVENT_CREATE = "checkify:create";
     Checkify.EVENT_DISABLED = "checkify:disable";
     Checkify.EVENT_REFRESH = "checkify:refresh";
     Checkify.EVENT_NAMESPACE = ".checkify";
     //defaults params
     Checkify._DEFAULTS = {
         wrap: false,
-        disabled: false
+        disabled: false,
+        controlsAction: "enable"
     };
     return Checkify;
 })();
+//Based on jquery widget integration
+$.fn.checkify = function (options) {
+    var isMethodCall = typeof options === "string", args = Array.prototype.slice.call(arguments, 1);
+    var stack = [];
+    if (isMethodCall) {
+        this.each(function () {
+            var methodValue, instance = $(this).data("Checkify");
+            if (options === "instance") {
+                stack.push(instance);
+            }
+            else {
+                if (!instance) {
+                    return $.error("cannot call methods on Checkify prior to initialization; " + "attempted to call method '" + options + "'");
+                }
+                if (!$.isFunction(instance[options]) || options.charAt(0) === "_") {
+                    return $.error("no such method '" + options + "' for Checkify instance");
+                }
+                if (options == "destroy") {
+                    $(this).data("Checkify", null);
+                }
+                methodValue = instance[options].apply(instance, args);
+                if (methodValue !== instance && methodValue !== undefined) {
+                    stack.push(methodValue);
+                }
+            }
+        });
+    }
+    else {
+        this.each(function () {
+            var instance = $(this).data("Checkify");
+            if (instance == undefined) {
+                options = options || {};
+                instance = new Checkify(this, options);
+                $(this).data("Checkify", instance);
+                stack.push(instance);
+            }
+        });
+    }
+    return stack.length === 1 ? stack[0] : stack;
+};
 //# sourceMappingURL=Checkify.js.map

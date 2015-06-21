@@ -64,22 +64,26 @@
         <p>Radio at same level of his label</p>
         <label for = "testradio2">Testradio input at same level of label</label>
         <input data-checkify-class-wrapper = "true" id = "testradio2" type = "radio" name = "a">
-
+        <input type="checkbox" data-checkify-controls="checkify:1 checkify:2 #slave">
+        <input type = "text" data-checkify-group="1"/>
+        <input type = "checkbox" checked="checked" data-checkify-group="1"/>
+        <input type = "checkbox" checked="checked" data-checkify-group="1"/>
+        <input type = "checkbox" checked="checked" data-checkify-group="1"/>
+        <input type = "checkbox" disabled="disabled" data-checkify-group="2"/>
+        <input type = "checkbox" id="slave"/>
         <div class = "log"></div>
 
         <script type = "text/javascript">
-            var inputs = $("input");
+            var inputs = $(":radio, :checkbox");
             for (var cont = 0; cont < inputs.length; cont++) {
                 var current = $(inputs[cont]);
-                new Checkify({
-                    masterNode: current
-                });
+                current.checkify();
                 current.on("crrefresh crchange change click", function (e) {
-                    console.log(e, arguments)
+                    //console.log(e, arguments)
                 });
             }
             $(".cr-input").on("click mouseover mouseout foucs blur touchstart touchend touchleave", function (e) {
-                $(".log").append("<p>" + e.type + "</p>");
+                //$(".log").append("<p>" + e.type + "</p>");
             });
         </script>
     </body>

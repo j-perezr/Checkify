@@ -495,6 +495,7 @@ describe("Checkify Test", function () {
                 instanceRadio = new Checkify({
                     masterNode: $radio
                 });
+                
             describe("3.1.1 When input don't have a label", function () {
                 describe("3.1.1.1. and click event is triggered by native input", function () {
                     describe("3.1.1.1.1 and input are unchecked", function () {
@@ -702,8 +703,8 @@ describe("Checkify Test", function () {
                     instanceRadio = new Checkify({
                         masterNode: $radio
                     }),
-                    $falselyCheck = $test3Container.find("[for='" + $check.attr("id") + "']"),
-                    $falselyRadio = $test3Container.find("[for='" + $radio.attr("id") + "']");
+                    $checkLabel = $test3Container.find("[for='" + $check.attr("id") + "']"),
+                    $radioLabel = $test3Container.find("[for='" + $radio.attr("id") + "']");
                 describe("3.1.3.1 and click event is triggered by native input", function () {
                     describe("3.3.1.1 and are unchecked", function () {
                         before(function () {
@@ -783,8 +784,8 @@ describe("Checkify Test", function () {
                     });
                     describe("3.1.3.3.1 and are unchecked", function () {
                         before(function () {
-                            $falselyCheck.trigger("click");
-                            $falselyRadio.trigger("click");
+                            $checkLabel.trigger("click");
+                            $radioLabel.trigger("click");
                         });
                         it("native input should be checked", function () {
                             expect($check.prop("checked")).to.be.true;
@@ -797,8 +798,8 @@ describe("Checkify Test", function () {
                     });
                     describe("3.1.3.3.2 and are checked", function () {
                         before(function () {
-                            $falselyCheck.trigger("click");
-                            $falselyRadio.trigger("click");
+                            $checkLabel.trigger("click");
+                            $radioLabel.trigger("click");
                         });
                         it("native checkbox should be unchecked", function () {
                             expect($check.prop("checked")).to.be.false;
@@ -825,8 +826,10 @@ describe("Checkify Test", function () {
                 instanceRadio = new Checkify({
                     masterNode: $radio
                 }),
-                $falselyCheck = $test3Container.find("[for='" + $check.attr("id") + "']"),
-                $falselyRadio = $test3Container.find("[for='" + $radio.attr("id") + "']");
+                $falselyCheck = instanceCheck._attributes.falselyInput,
+                $falselyRadio = instanceRadio._attributes.falselyInput,
+                $checkLabel = $test3Container.find("[for='" + $check.attr("id") + "']"),
+                $radioLabel = $test3Container.find("[for='" + $radio.attr("id") + "']");
             describe("3.2.1. When input don't have a label", function () {
                 describe("3.2.1.1 and mousedown is triggered by native input", function () {
                     before(function () {
@@ -869,61 +872,125 @@ describe("Checkify Test", function () {
                     });
                 });
             });
-            describe("3.2. Mouseover & mouseout", function () {
-                var $check = $test3Container.find("#test33"),
-                    instanceCheck = new Checkify({
-                        masterNode: $check
-                    }),
-                    $radio = $test3Container.find("#test34"),
-                    instanceRadio = new Checkify({
-                        masterNode: $radio
-                    }),
-                    $falselyCheck = $test3Container.find("[for='" + $check.attr("id") + "']"),
-                    $falselyRadio = $test3Container.find("[for='" + $radio.attr("id") + "']");
-                describe("3.2.1. When input don't have a label", function () {
-                    describe("3.2.1.1 and mousehover is triggered by native input", function () {
-                        before(function () {
-                            $check.trigger("mouseover");
-                            $radio.trigger("mouseover");
-                        });
-                        it("falsely input should have a class", function () {
-                            expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.true;
-                            expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.true;
-                        })
+            describe("3.2.2. When input have a label",function(){
+                describe("3.2.1.3 and mousedown is triggered by native input", function () {
+                    before(function () {
+                        $check.trigger("mousedown");
+                        $radio.trigger("mousedown");
                     });
-                    describe("3.2.1.2 and mouseout is triggered by native input", function () {
-                        before(function () {
-                            $check.trigger("mouseout");
-                            $radio.trigger("mouseout");
-                        });
-                        it("falsely input should have a class", function () {
-                            expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.false;
-                            expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.false;
-                        })
+                    it("falsely input should have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
                     });
-                    describe("3.2.1.3 and mousehover is triggered by falsely input", function () {
-                        before(function () {
-                            $falselyCheck.trigger("mouseover");
-                            $falselyRadio.trigger("mouseover");
-                        });
+                });
+                describe("3.2.1.4 and mouseup is triggered by native input", function () {
+                    before(function () {
+                        $check.trigger("mouseup");
+                        $radio.trigger("mouseup");
+                    });
+                    it("falsely input shouldn't have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
+                    });
+                });
+                describe("3.2.2.1 and mousedown is triggered by label", function () {
+                    before(function () {
+                        $checkLabel.trigger("mousedown");
+                        $radioLabel.trigger("mousedown");
+                    });
+                    it("falsely input should have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
+                    })
+                });
+                describe("3.2.1.2 and mouseup is triggered by label", function () {
+                    before(function () {
+                        $checkLabel.trigger("mouseup");
+                        $radioLabel.trigger("mouseup");
+                    });
+                    it("falsely input shouldn't have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
+                    })
+                });
+                describe("3.2.2.1 and mousedown is triggered by label", function () {
+                    before(function () {
+                        $checkLabel.trigger("mousedown");
+                        $radioLabel.trigger("mousedown");
+                    });
+                    it("falsely input should have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.true;
+                    })
+                });
+                describe("3.2.1.2 and mouseup is triggered by label", function () {
+                    before(function () {
+                        $checkLabel.trigger("mouseup");
+                        $radioLabel.trigger("mouseup");
+                    });
+                    it("falsely input shouldn't have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_ACTIVE)).to.be.false;
+                    })
+                });
+            });
+        });
+        describe("3.2. Mouseover & mouseout", function () {
+            var $check = $test3Container.find("#test33"),
+                instanceCheck = new Checkify({
+                    masterNode: $check
+                }),
+                $radio = $test3Container.find("#test34"),
+                instanceRadio = new Checkify({
+                    masterNode: $radio
+                }),
+                $falselyCheck = instanceCheck._attributes.falselyInput,
+                $falselyRadio = instanceRadio._attributes.falselyInput;
+            describe("3.2.1. When input don't have a label", function () {
+                describe("3.2.1.1 and mousehover is triggered by native input", function () {
+                    before(function () {
+                        $check.trigger("mouseover");
+                        $radio.trigger("mouseover");
+                    });
+                    it("falsely input should have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.true;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.true;
+                    })
+                });
+                describe("3.2.1.2 and mouseout is triggered by native input", function () {
+                    before(function () {
+                        $check.trigger("mouseout");
+                        $radio.trigger("mouseout");
+                    });
+                    it("falsely input should have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.false;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.false;
+                    })
+                });
+                describe("3.2.1.3 and mousehover is triggered by falsely input", function () {
+                    before(function () {
+                        $falselyCheck.trigger("mouseover");
+                        $falselyRadio.trigger("mouseover");
+                    });
 
-                        it("falsely input shouldn't have a class", function () {
-                            expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.true;
-                            expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.true;
-                        });
+                    it("falsely input shouldn't have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.true;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.true;
                     });
-                    describe("3.2.1.4 and mouseout is triggered by falsely input", function () {
-                        before(function () {
-                            $falselyCheck.trigger("mouseout");
-                            $falselyRadio.trigger("mouseout");
-                        });
-                        it("falsely input shouldn't have a class", function () {
-                            expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.false;
-                            expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.false;
-                        });
+                });
+                describe("3.2.1.4 and mouseout is triggered by falsely input", function () {
+                    before(function () {
+                        $falselyCheck.trigger("mouseout");
+                        $falselyRadio.trigger("mouseout");
+                    });
+                    it("falsely input shouldn't have a class", function () {
+                        expect($falselyCheck.hasClass(Checkify.CLASS_HOVER)).to.be.false;
+                        expect($falselyRadio.hasClass(Checkify.CLASS_HOVER)).to.be.false;
                     });
                 });
             });
         });
+        //Focus blur
+        
     });
 });
